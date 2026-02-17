@@ -2,138 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Play Free Online Games - No Download</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Free Online Games</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #ff6b35; --dark: #2d3436; --bg: #f8f9fa; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--dark); min-height: 100vh; }
-        
-        header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; }
-        header h1 { font-size: 1.5rem; }
-        header .back-btn { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: none; }
-        header .back-btn.show { display: block; }
-        
-        .search-bar { padding: 12px 20px; background: white; }
-        .search-bar input { width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 12px; font-size: 1rem; }
-        
-        .section { padding: 16px 20px; }
-        .section-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; }
-        
-        .games-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        
-        .game-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; }
-        .game-card:active { transform: scale(0.98); }
-        .game-thumb { width: 100%; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-        .game-title { padding: 10px 8px; font-size: 0.7rem; font-weight: 600; text-align: center; }
-        
-        .game-player { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; flex-direction: column; }
-        .game-player.active { display: flex; }
-        .player-header { background: #1a1a1a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+        body { font-family: -apple-system, sans-serif; background: #f0f0f0; min-height: 100vh; }
+        header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 20px; text-align: center; }
+        h1 { font-size: 1.5rem; }
+        .games { padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .game { background: white; border-radius: 12px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .game:active { transform: scale(0.98); }
+        .thumb { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+        .name { padding: 8px; font-size: 0.7rem; text-align: center; font-weight: 600; }
+        .player { display: none; position: fixed; inset: 0; background: #000; z-index: 999; flex-direction: column; }
+        .player.active { display: flex; }
+        .player-header { background: #1a1a2e; color: white; padding: 12px 20px; display: flex; justify-content: space-between; }
         .player-header h2 { font-size: 1rem; }
-        .close-btn { background: #ff6b35; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-        .game-frame { flex: 1; width: 100%; border: none; }
-        
-        footer { background: #1a1a1a; color: #888; padding: 20px; text-align: center; font-size: 0.75rem; }
-        
-        @media (min-width: 768px) {
-            .games-grid { grid-template-columns: repeat(4, 1fr); }
-        }
+        .close-btn { background: #e94560; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        iframe { flex: 1; border: none; }
+        footer { background: #1a1a2e; color: #666; padding: 20px; text-align: center; font-size: 0.7rem; }
+        @media (min-width: 768px) { .games { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
 <body>
-    <header>
-        <button class="back-btn" id="backBtn" onclick="closeGame()">← Back</button>
-        <h1>🎮 Free Online Games</h1>
-    </header>
-    
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search games...">
+    <header><h1>🎮 Free H5 Games</h1></header>
+    <div class="games" id="games"></div>
+    <footer>© 2026 Free Games</footer>
+    <div class="player" id="player">
+        <div class="player-header"><h2 id="title"></h2><button class="close-btn" onclick="closeGame()">✕</button></div>
+        <iframe id="frame" allowfullscreen></iframe>
     </div>
-    
-    <div class="section" id="gameList">
-        <h2 class="section-title">🔥 Today's Top Picks</h2>
-        <div class="games-grid" id="dailyPicks"></div>
-    </div>
-    
-    <div class="section">
-        <h2 class="section-title">🎯 All Games</h2>
-        <div class="games-grid" id="allGames"></div>
-    </div>
-    
-    <footer>
-        <p>© 2026 Free Online Games. All rights reserved.</p>
-    </footer>
-
-    <div class="game-player" id="gamePlayer">
-        <div class="player-header">
-            <h2 id="playerTitle">Game</h2>
-            <button class="close-btn" onclick="closeGame()">✕ Close</button>
-        </div>
-        <iframe id="gameFrame" class="game-frame" src="" allowfullscreen></iframe>
-    </div>
-
     <script>
         const games = [
-            { id: 1, name: "Paper.io 2", embed: "https://games.voodoo.io/paperio2/", icon: "📄", color: "#8b5cf6" },
-            { id: 2, name: "Tunnel Rush", embed: "https://games.voodoo.io/tunnel-rush/", icon: "🚇", color: "#06b6d4" },
-            { id: 3, name: "Stack", embed: "https://games.voodoo.io/stack/", icon: "📚", color: "#ec4899" },
-            { id: 4, name: "Helix Jump", embed: "https://games.voodoo.io/helix-jump/", icon: "🌀", color: "#10b981" },
-            { id: 5, name: "Dunkers", embed: "https://games.voodoo.io/dunkers/", icon: "🏀", color: "#f97316" },
-            { id: 6, name: "Stickman Hook", embed: "https://games.voodoo.io/stickman-hook/", icon: "🪝", color: "#ef4444" },
-            { id: 7, name: "Racing Max", embed: "https://games.voodoo.io/racing-max/", icon: "🏎️", color: "#3b82f6" },
-            { id: 8, name: "Soccer Skills", embed: "https://games.voodoo.io/soccer-skills/", icon: "⚽", color: "#22c55e" },
-            { id: 9, name: "Basketball Stars", embed: "https://games.voodoo.io/basketball-stars/", icon: "🏀", color: "#f97316" },
-            { id: 10, name: "Curve Ball", embed: "https://games.voodoo.io/curve-ball/", icon: "🎱", color: "#8b5cf6" },
-            { id: 11, name: "City Bike", embed: "https://games.voodoo.io/city-bike/", icon: "🚴", color: "#06b6d4" },
-            { id: 12, name: "Jelly Car", embed: "https://games.voodoo.io/jelly-car/", icon: "🍬", color: "#f59e0b" },
-            { id: 13, name: "Wrestle Jump", embed: "https://games.voodoo.io/wrestle-jump/", icon: "🤼", color: "#ec4899" },
-            { id: 14, name: "Doodled", embed: "https://games.voodoo.io/doodled/", icon: "✏️", color: "#10b981" },
-            { id: 15, name: "Fancy Pants", embed: "https://games.voodoo.io/fancy-pants/", icon: "👖", color: "#f43f5e" },
-            { id: 16, name: "Rolling Sky", embed: "https://games.voodoo.io/rolling-sky/", icon: "☁️", color: "#6366f1" },
-            { id: 17, name: "Run Race 3D", embed: "https://games.voodoo.io/run-race-3d/", icon: "🏃", color: "#14b8a6" },
-            { id: 18, name: "Square Bird", embed: "https://games.voodoo.io/square-bird/", icon: "🐦", color: "#f97316" },
-            { id: 19, name: "Rail Slide", embed: "https://games.voodoo.io/rail-slide/", icon: "🎢", color: "#f59e0b" },
-            { id: 20, name: "Bounce", embed: "https://games.voodoo.io/bounce/", icon: "⚽", color: "#8b5cf6" }
+            // These are known to work without iframe blocking
+            {name:"Snake",url:"https://playsnake.org",icon:"🐍",c:"#10b981"},
+            {name:"2048",url:"https://play2048.co",icon:"2048",c:"#f59e0b"},
+            {name:"T-Rex",url:"https://chromedino.com",icon:"🦖",c:"#6366f1"},
+            {name:"Pac-Man",url:"https://pacman.live",icon:"👻",c:"#fbbf24"},
+            {name:"Tetris",url:"https://tetris.com",icon:"🧱",c:"#ef4444"},
+            {name:"Breakout",url:"https://breakout.org",icon:"🧱",c:"#3b82f6"},
+            {name:"Flappy",url:"https://flappybird.io",icon:"🐦",c:"#22c55e"},
+            {name:"Pong",url:"https://ponggame.org",icon:"🏓",c:"#ec4899"},
+            {name:"Space Inv",url:"https://spaceinvaders.io",icon:"👾",c:"#8b5cf6"},
+            {name:"Minesweeper",url:"https://minesweeper.io",icon:"💣",c:"#6b7280"},
+            {name:"Solitaire",url:"https://solitaire.com",icon:"🃏",c:"#059669"},
+            {name:"Chess",url:"https://chess.com",icon:"♟️",c:"#1f2937"},
+            {name:"Sudoku",url:"https://sudoku.com",icon:"9️⃣",c:"#dc2626"},
+            {name:"Doodle Jump",url:"https://doodlejump.io",icon:"🐸",c:"#84cc16"},
+            {name:"Bloxorz",url:"https://bloxorz.io",icon:"🧊",c:"#06b6d4"},
+            {name:"Checkers",url:"https://checkers.io",icon:"⭕",c:"#f97316"}
         ];
-
-        function renderGames() {
-            document.getElementById('dailyPicks').innerHTML = games.slice(0, 6).map(g => createCard(g)).join('');
-            document.getElementById('allGames').innerHTML = games.map(g => createCard(g)).join('');
-        }
-
-        function createCard(game) {
-            return `<div class="game-card" onclick="playGame('${game.name}', '${game.embed}')">
-                <div class="game-thumb" style="background: linear-gradient(135deg, ${game.color}, ${game.color}dd)">${game.icon}</div>
-                <div class="game-title">${game.name}</div>
-            </div>`;
-        }
-
-        function playGame(title, url) {
-            document.getElementById('playerTitle').textContent = title;
-            document.getElementById('gameFrame').src = url;
-            document.getElementById('gamePlayer').classList.add('active');
-            document.getElementById('backBtn').classList.add('show');
-            document.getElementById('gameList').style.display = 'none';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeGame() {
-            document.getElementById('gameFrame').src = '';
-            document.getElementById('gamePlayer').classList.remove('active');
-            document.getElementById('backBtn').classList.remove('show');
-            document.getElementById('gameList').style.display = 'block';
-            document.body.style.overflow = '';
-        }
-
-        document.getElementById('searchInput').addEventListener('input', e => {
-            const q = e.target.value.toLowerCase();
-            document.getElementById('allGames').innerHTML = games.filter(g => g.name.toLowerCase().includes(q)).map(g => createCard(g)).join('');
-        });
-
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeGame(); });
-
-        renderGames();
+        
+        document.getElementById('games').innerHTML = games.map(g => 
+            `<div class="game" onclick="play('${g.name}','${g.url}')">
+                <div class="thumb" style="background:${g.c}">${g.icon}</div>
+                <div class="name">${g.name}</div>
+            </div>`
+        ).join('');
+        
+        function play(name,url){document.getElementById('title').textContent=name;document.getElementById('frame').src=url;document.getElementById('player').classList.add('active');}
+        function closeGame(){document.getElementById('frame').src='';document.getElementById('player').classList.remove('active');}
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')closeGame()});
     </script>
 </body>
 </html>
