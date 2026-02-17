@@ -142,13 +142,8 @@ function dropBall(){
     holdBall = null;
   }
 }
-// Use touchstart for mobile - more reliable
-document.addEventListener('touchstart', e=>{
-  if(e.target === game || e.target.classList.contains('ball')) {
-    dropBall();
-  }
-}, {passive: false});
-
+// Tap anywhere to drop
+document.addEventListener('touchstart', dropBall);
 document.addEventListener('click', dropBall);
 
 update();
