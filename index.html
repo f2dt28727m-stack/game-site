@@ -16,7 +16,7 @@
         .name { padding: 8px; font-size: 0.7rem; text-align: center; font-weight: 600; }
         .player { display: none; position: fixed; inset: 0; background: #000; z-index: 999; flex-direction: column; }
         .player.active { display: flex; }
-        .player-header { background: #1a1a2e; color: white; padding: 12px 20px; display: flex; justify-content: space-between; }
+        .player-header { background: #1a1a2e; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
         .player-header h2 { font-size: 1rem; }
         .close-btn { background: #e94560; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
         iframe { flex: 1; border: none; }
@@ -33,24 +33,20 @@
         <iframe id="frame" allowfullscreen></iframe>
     </div>
     <script>
+        // Games that allow iframe embedding
         const games = [
-            // These are known to work without iframe blocking
-            {name:"Snake",url:"https://playsnake.org",icon:"🐍",c:"#10b981"},
-            {name:"2048",url:"https://play2048.co",icon:"2048",c:"#f59e0b"},
-            {name:"T-Rex",url:"https://chromedino.com",icon:"🦖",c:"#6366f1"},
-            {name:"Pac-Man",url:"https://pacman.live",icon:"👻",c:"#fbbf24"},
-            {name:"Tetris",url:"https://tetris.com",icon:"🧱",c:"#ef4444"},
-            {name:"Breakout",url:"https://breakout.org",icon:"🧱",c:"#3b82f6"},
-            {name:"Flappy",url:"https://flappybird.io",icon:"🐦",c:"#22c55e"},
-            {name:"Pong",url:"https://ponggame.org",icon:"🏓",c:"#ec4899"},
-            {name:"Space Inv",url:"https://spaceinvaders.io",icon:"👾",c:"#8b5cf6"},
-            {name:"Minesweeper",url:"https://minesweeper.io",icon:"💣",c:"#6b7280"},
-            {name:"Solitaire",url:"https://solitaire.com",icon:"🃏",c:"#059669"},
-            {name:"Chess",url:"https://chess.com",icon:"♟️",c:"#1f2937"},
-            {name:"Sudoku",url:"https://sudoku.com",icon:"9️⃣",c:"#dc2626"},
-            {name:"Doodle Jump",url:"https://doodlejump.io",icon:"🐸",c:"#84cc16"},
-            {name:"Bloxorz",url:"https://bloxorz.io",icon:"🧊",c:"#06b6d4"},
-            {name:"Checkers",url:"https://checkers.io",icon:"⭕",c:"#f97316"}
+            {name:"Dino Game",url:"https://dino-chrome.com",icon:"🦖",c:"#6366f1"},
+            {name:"2048",url:"https://2048game.com",icon:"2048",c:"#f59e0b"},
+            {name:"Snake",url:"https://snake.io",icon:"🐍",c:"#10b981"},
+            {name:"Pac-Man",url:"https://jsnes.org",icon:"👻",c:"#fbbf24"},
+            {name:"Tron",url:"https://tron.io",icon:"💻",c:"#3b82f6"},
+            {name:"Hextris",url:"https://hextris.io",icon:"🧱",c:"#ef4444"},
+            {name:"Crossy Road",url:"https://crossyroad.io",icon:"🐔",c:"#22c55e"},
+            {name:"Bubble Shooter",url:"https://bubbleshooter.io",icon:"🫧",c:"#ec4899"},
+            {name:"ZigZag",url:"https://zigz.ag",icon:"⚡",c:"#8b5cf6"},
+            {name:"Doodle Jump",url:"https://doodledood.io",icon:"🐸",c:"#84cc16"},
+            {name:"Wordle",url:"https://wordle.mit.edu",icon:"📝",c:"#059669"},
+            {name:"Solitaire",url:"https://solitr.com",icon:"🃏",c:"#1f2937"}
         ];
         
         document.getElementById('games').innerHTML = games.map(g => 
