@@ -133,17 +133,34 @@ function moveBall(clientX){
   holdBall.el.style.left = (x - holdBall.r) + 'px';
 }
 
+function moveBall(clientX){
+  if(!holdBall || gameOver) return;
+  const r = game.getBoundingClientRect();
+  let x = clientX - r.left;
+  x = Math.max(holdBall.r, Math.min(320-holdBall.r, x));
+  holdBall.x = x;
+  holdBall.el.style.left = (x - holdBall.r) + 'px';
+}
+
 document.addEventListener('mousemove', e=>moveBall(e.clientX));
-document.addEventListener('touchmove', e=>{ e.preventDefault(); moveBall(e.touches[0].clientX) }, {passive: false});
+document.addEventListener('touchmove', e=>{ 
+  e.preventDefault(); 
+  moveBall(e.touches[0].clientX); 
+}, {passive: false});
 
 function dropBall(){
+  console.log('dropBall called', holdBall, gameOver);
   if(holdBall && !gameOver){
     balls.push(holdBall);
     holdBall = null;
   }
 }
-// Tap anywhere to drop
-document.addEventListener('touchstart', dropBall);
+
+document.addEventListener('touchstart', e=>{
+  e.preventDefault();
+  dropBall();
+}, {passive: false});
+
 document.addEventListener('click', dropBall);
 
 update();
