@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>合成球球</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+body{display:flex;justify-content:center;align-items:center;flex-direction:column;gap:10px;background:#1a1a2e;padding:10px}
+.score{font-size:22px;font-weight:600;color:#ffd700}
+#game{width:320px;height:520px;background:#16213e;border:3px solid #0f3460;position:relative;overflow:hidden;border-radius:8px;box-shadow:0 0 30px rgba(102,126,234,0.3)}
+#warnLine{position:absolute;top:100px;left:0;width:100%;height:2px;background:#e94560;opacity:0.6;box-shadow:0 0 10px #e94560}
+.ball{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,0.4),inset 0 -3px 6px rgba(0,0,0,0.3),inset 0 3px 6px rgba(255,255,255,0.2)}
+.title{color:#667eea;font-size:14px;margin-bottom:5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="title">🎮 合成球球</div>
+<div class="score" id="score">得分: 0</div>
+<div id="game">
+  <div id="warnLine"></div>
+</div>
+
+<script>
+const game = document.getElementById('game');
+const scoreEl = document.getElementById('score');
+let score = 0;
+let gameOver = false;
+const G = 0.28;
+const FRIC = 0.97;
+const BOUNCE = 0.5;
+
+const ballTypes = [
+  {r:13, c:'#6c757d', n:'乒乓'},
+  {r:17, c:'#28a745', n:'网球'},
+  {r:21, c:'#ffc107', n:'棒球'},
+  {r:25, c:'#17a2b8', n:'高尔夫'},
+  {r:30, c:'#dc3545', n:'篮球'},
+  {r:35, c:'#6610f2', n:'足球'},
+  {r:40, c:'#e83e8c', n:'排球'},
+  {r:48, c:'#6c757d', n:'保龄'},
+  {r:58, c:'#fd7e14', n:'台球'},
+  {r:75, c:'#20c997', n:'巨球'}
+];
+
+let balls = [];
+let holdBall = null;
+
+function randBallType(){ return ballTypes[Math.floor(Math.random()*4)] }
+
+function createBall(type, x, y){
+  const el = document.createElement('div');
+  el.className = 'ball';
+  el.style.width = el.style.height = type.r*2 + 'px';
+  el.style.background = type.c;
+  el.innerText = type.n;
+  game.appendChild(el);
+  const b = {el, type, x, y, vx:0, vy:0, r:type.r};
+  el._data = b;
+  return b;
+}
+
+function update(){
+  if(gameOver) return requestAnimationFrame(update);
+  if(!holdBall) holdBall = createBall(randBallType(), 160, -40);
+
+  balls.forEach(b=>{
+    if(b === holdBall) return;
+    b.vy += G;
+    b.x += b.vx;
+    b.y += b.vy;
+    b.vx *= FRIC;
+    if(b.x - b.r < 0){ b.x = b.r; b.vx *= -BOUNCE }
+    if(b.x + b.r > 320){ b.x = 320 - b.r; b.vx *= -BOUNCE }
+    if(b.y + b.r > 520){ b.y = 520 - b.r; b.vy *= -BOUNCE }
+    b.el.style.left = (b.x - b.r) + 'px';
+    b.el.style.top = (b.y - b.r) + 'px';
+  });
+
+  checkCollide();
+  checkLose();
+  requestAnimationFrame(update);
+}
+
+function checkCollide(){
+  for(let i=0;i<balls.length;i++){
+    for(let j=i+1;j<balls.length;j++){
+      const a = balls[i], b = balls[j];
+      if(!a || !b || a.type!==b.type) continue;
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const d = Math.hypot(dx, dy);
+      if(d < a.r + b.r - 4){
+        merge(a,b);
+        i--; break;
+      }
+    }
+  }
+}
+
+function merge(a,b){
+  const idx = ballTypes.indexOf(a.type);
+  if(idx <0 || idx >= ballTypes.length-1) return;
+  game.removeChild(a.el);
+  game.removeChild(b.el);
+  balls = balls.filter(p=>p!==a && p!==b);
+  const nx = (a.x+b.x)/2, ny = (a.y+b.y)/2;
+  const nxt = createBall(ballTypes[idx+1], nx, ny);
+  nxt.vx = (a.vx+b.vx)*0.4;
+  nxt.vy = (a.vy+b.vy)*0.4;
+  balls.push(nxt);
+  addScore((idx+2)*15);
+}
+
+function addScore(s){ score += s; scoreEl.innerText = '得分: '+score }
+
+function checkLose(){
+  if(gameOver) return;
+  for(const b of balls){
+    if(b.y - b.r < 100){
+      gameOver = true;
+      alert('游戏结束！得分：'+score);
+      location.reload();
+    }
+  }
+}
+
+document.addEventListener('mousemove', e=>{
+  if(!holdBall || gameOver) return;
+  const r = game.getBoundingClientRect();
+  let x = e.clientX - r.left;
+  x = Math.max(holdBall.r, Math.min(320-holdBall.r, x));
+  holdBall.x = x;
+  holdBall.el.style.left = (x - holdBall.r) + 'px';
+});
+
+document.addEventListener('touchmove', e=>{
+  if(!holdBall || gameOver) return;
+  const r = game.getBoundingClientRect();
+  let x = e.touches[0].clientX - r.left;
+  x = Math.max(holdBall.r, Math.min(320-holdBall.r, x));
+  holdBall.x = x;
+  holdBall.el.style.left = (x - holdBall.r) + 'px';
+}, {passive: false});
+
+document.addEventListener('click', ()=>{
+  if(holdBall && !gameOver){
+    balls.push(holdBall);
+    holdBall = null;
+  }
+});
+
+document.addEventListener('touchend', ()=>{
+  if(holdBall && !gameOver){
+    balls.push(holdBall);
+    holdBall = null;
+  }
+});
+
+update();
+</script>
+</body>
+</html>
