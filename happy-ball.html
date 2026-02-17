@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Happy Ball</title>
+    <title>Happy Ball - Space Adventure</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, sans-serif; 
-            background: #1a1a2e; 
-            color: white; 
-            overflow:-action: none;
- hidden;
-            touch        }
-        #game { width: 100vw; height: 100vh; display: block; }
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        #game { 
+            width: 100vw; 
+            height: 100vh; 
+            display: block;
+            background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3a 50%, #2a1a4a 100%);
+        }
+        
         #ui {
             position: fixed;
             top: 20px;
@@ -23,36 +28,106 @@
             pointer-events: none;
             z-index: 10;
         }
-        #score { font-size: 2rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        #hint { font-size: 0.9rem; opacity: 0.7; margin-top: 5px; }
+        
+        #score { 
+            font-size: 2.5rem; 
+            font-weight: bold; 
+            text-shadow: 0 0 20px #667eea, 0 0 40px #764ba2;
+            color: #fff;
+        }
+        
+        #hint { 
+            font-size: 0.9rem; 
+            opacity: 0.8; 
+            margin-top: 5px;
+            color: #a0a0d0;
+        }
+        
+        #level {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 1rem;
+            color: #667eea;
+            z-index: 10;
+        }
+        
         #restart, #win {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #e94560;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            padding: 20px 50px;
+            font-size: 1.3rem;
             border-radius: 30px;
             cursor: pointer;
             z-index: 20;
             display: none;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+            animation: pulse 2s infinite;
         }
-        #win { background: linear-gradient(135deg, #667eea, #764ba2); }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5); }
+            50% { box-shadow: 0 10px 50px rgba(102, 126, 234, 0.8); }
+        }
+        
+        #win {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
+    <!-- Star background -->
+    <div class="stars" id="stars"></div>
+    
+    <div id="level">LEVEL <span id="levelNum">1</span></div>
     <div id="ui">
         <div id="score">0</div>
-        <div id="hint">Draw lines to guide ball to cup</div>
+        <div id="hint">✨ Draw lines to guide the star to the portal ✨</div>
     </div>
     <canvas id="game"></canvas>
-    <button id="restart" onclick="restart()">Try Again</button>
-    <button id="win" onclick="nextLevel()">Next Level!</button>
+    <button id="restart" onclick="restart()">🔄 Try Again</button>
+    <button id="win" onclick="nextLevel()">🌟 Next Level!</button>
 
     <script>
+        // Generate stars background
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
+            star.style.animationDelay = Math.random() * 2 + 's';
+            starsContainer.appendChild(star);
+        }
+        
         const canvas = document.getElementById('game');
         const ctx = canvas.getContext('2d');
         
@@ -72,21 +147,37 @@
         resize();
         window.addEventListener('resize', resize);
         
+        // Star (player) class
         class Ball {
             constructor(x, y) {
-                this.x = x; this.y = y;
-                this.vx = 0; this.vy = 0;
-                this.radius = 15;
-                this.gravity = 0.5;
-                this.bounce = 0.6;
-                this.friction = 0.99;
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.radius = 18;
+                this.gravity = 0.4;
+                this.bounce = 0.65;
+                this.friction = 0.995;
+                this.trail = [];
+                this.angle = 0;
             }
+            
             update() {
+                // Gravity
                 this.vy += this.gravity;
                 this.vx *= this.friction;
                 this.vy *= this.friction;
                 this.x += this.vx;
                 this.y += this.vy;
+                
+                // Trail effect
+                this.trail.push({x: this.x, y: this.y});
+                if (this.trail.length > 15) this.trail.shift();
+                
+                // Rotation
+                this.angle += 0.1;
+                
+                // Wall collision
                 if (this.x < this.radius) { this.x = this.radius; this.vx *= -this.bounce; }
                 if (this.x > W - this.radius) { this.x = W - this.radius; this.vx *= -this.bounce; }
                 if (this.y > H + 50 && gameRunning) {
@@ -94,73 +185,157 @@
                     gameRunning = false;
                 }
             }
+            
             draw() {
+                // Draw trail
+                for (let i = 0; i < this.trail.length; i++) {
+                    const alpha = i / this.trail.length;
+                    ctx.beginPath();
+                    ctx.arc(this.trail[i].x, this.trail[i].y, this.radius * alpha * 0.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(102, 126, 234, ${alpha * 0.5})`;
+                    ctx.fill();
+                }
+                
+                // Glow effect
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
+                gradient.addColorStop(0, 'rgba(240, 147, 251, 1)');
+                gradient.addColorStop(0.5, 'rgba(102, 126, 234, 0.8)');
+                gradient.addColorStop(1, 'rgba(102, 126, 234, 0)');
+                ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#e94560';
+                ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.strokeStyle = 'white';
+                
+                // Star shape
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                    const r = i === 0 ? this.radius : this.radius;
+                    const x = Math.cos(angle) * r;
+                    const y = Math.sin(angle) * r;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = '#f093fb';
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
                 ctx.lineWidth = 2;
                 ctx.stroke();
+                ctx.restore();
             }
         }
         
+        // Energy line (player drawn)
         class Line {
-            constructor(points) { this.points = points; }
+            constructor(points) {
+                this.points = points;
+            }
+            
             draw() {
                 if (this.points.length < 2) return;
+                
+                // Glow
+                ctx.shadowColor = '#00ffaa';
+                ctx.shadowBlur = 15;
+                
                 ctx.beginPath();
                 ctx.moveTo(this.points[0].x, this.points[0].y);
-                for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y);
-                ctx.strokeStyle = '#ffd700';
+                for (let i = 1; i < this.points.length; i++) {
+                    ctx.lineTo(this.points[i].x, this.points[i].y);
+                }
+                ctx.strokeStyle = '#00ffaa';
                 ctx.lineWidth = 8;
                 ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
                 ctx.stroke();
+                
+                ctx.shadowBlur = 0;
             }
+            
             checkCollision(ball) {
                 for (let i = 0; i < this.points.length - 1; i++) {
-                    let p1 = this.points[i], p2 = this.points[i+1];
-                    let dx = p2.x - p1.x, dy = p2.y - p1.y;
-                    let len = Math.sqrt(dx*dx + dy*dy);
+                    let p1 = this.points[i];
+                    let p2 = this.points[i + 1];
+                    
+                    let dx = p2.x - p1.x;
+                    let dy = p2.y - p1.y;
+                    let len = Math.sqrt(dx * dx + dy * dy);
                     if (len === 0) continue;
-                    let t = Math.max(0, Math.min(1, ((ball.x-p1.x)*dx + (ball.y-p1.y)*dy) / (len*len)));
-                    let cx = p1.x + t*dx, cy = p1.y + t*dy;
-                    let dist = Math.sqrt((ball.x-cx)**2 + (ball.y-cy)**2);
+                    
+                    let t = Math.max(0, Math.min(1, ((ball.x - p1.x) * dx + (ball.y - p1.y) * dy) / (len * len)));
+                    let closestX = p1.x + t * dx;
+                    let closestY = p1.y + t * dy;
+                    
+                    let distX = ball.x - closestX;
+                    let distY = ball.y - closestY;
+                    let dist = Math.sqrt(distX * distX + distY * distY);
+                    
                     if (dist < ball.radius + 4) {
-                        let nx = (ball.x-cx)/dist, ny = (ball.y-cy)/dist;
-                        ball.vx += nx * 3;
-                        ball.vy += ny * 3;
-                        ball.x = cx + nx * (ball.radius + 5);
-                        ball.y = cy + ny * (ball.radius + 5);
+                        let nx = distX / dist;
+                        let ny = distY / dist;
+                        ball.vx += nx * 4;
+                        ball.vy += ny * 4;
+                        ball.x = closestX + nx * (ball.radius + 5);
+                        ball.y = closestY + ny * (ball.radius + 5);
                     }
                 }
             }
         }
         
+        // Portal (goal)
         class Cup {
             constructor(x, y) {
-                this.x = x; this.y = y;
-                this.w = 60; this.h = 50;
+                this.x = x;
+                this.y = y;
+                this.width = 70;
+                this.height = 60;
                 this.filled = false;
+                this.angle = 0;
             }
+            
             draw() {
-                ctx.fillStyle = this.filled ? '#10b981' : '#6366f1';
+                this.angle += 0.05;
+                
+                // Portal glow
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.width);
+                gradient.addColorStop(0, this.filled ? '#00ff88' : '#667eea');
+                gradient.addColorStop(0.5, this.filled ? '#00aa55' : '#764ba2');
+                gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                
+                ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.moveTo(this.x-this.w/2, this.y-this.h/2);
-                ctx.lineTo(this.x-this.w/2+10, this.y+this.h/2);
-                ctx.lineTo(this.x+this.w/2-10, this.y+this.h/2);
-                ctx.lineTo(this.x+this.w/2, this.y-this.h/2);
-                ctx.closePath();
+                ctx.arc(this.x, this.y, this.width, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                
+                // Inner portal
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.width * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = this.filled ? '#00ff88' : '#1a1a3a';
+                ctx.fill();
+                
+                // Swirl effect
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                for (let i = 0; i < 3; i++) {
+                    ctx.rotate(Math.PI * 2 / 3);
+                    ctx.beginPath();
+                    ctx.arc(this.width * 0.3, 0, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = this.filled ? '#fff' : '#667eea';
+                    ctx.fill();
+                }
+                ctx.restore();
             }
+            
             checkCollision(ball) {
-                if (ball.x > this.x-this.w/2 && ball.x < this.x+this.w/2 &&
-                    ball.y > this.y-this.h/2 && ball.y < this.y+this.h/2 && !this.filled) {
+                let dist = Math.sqrt((ball.x - this.x) ** 2 + (ball.y - this.y) ** 2);
+                if (dist < this.width * 0.6 && !this.filled) {
                     this.filled = true;
-                    score += 100;
+                    score += 100 * currentLevel;
                     document.getElementById('score').textContent = score;
                     gameRunning = false;
                     document.getElementById('win').style.display = 'block';
@@ -168,21 +343,60 @@
             }
         }
         
+        // Platform obstacles
         class Obstacle {
-            constructor(x, y, w, h) { this.x = x; this.y = y; this.w = w; this.h = h; }
-            draw() {
-                ctx.fillStyle = '#4a5568';
-                ctx.fillRect(this.x, this.y, this.w, this.h);
+            constructor(x, y, w, h) {
+                this.x = x;
+                this.y = y;
+                this.w = w;
+                this.h = h;
             }
+            
+            draw() {
+                // Glow edge
+                ctx.shadowColor = '#ff6b6b';
+                ctx.shadowBlur = 10;
+                
+                // Main body
+                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.h);
+                gradient.addColorStop(0, '#ff6b6b');
+                gradient.addColorStop(1, '#c92a2a');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(this.x, this.y, this.w, this.h);
+                
+                // Highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx.fillRect(this.x, this.y, this.w, 3);
+                
+                ctx.shadowBlur = 0;
+            }
+            
             checkCollision(ball) {
-                if (ball.x+ball.radius > this.x && ball.x-ball.radius < this.x+this.w &&
-                    ball.y+ball.radius > this.y && ball.y-ball.radius < this.y+this.h) {
-                    let l = ball.x-this.x, r = this.x+this.w-ball.x, t = ball.y-this.y, b = this.y+this.h-ball.y;
-                    let min = Math.min(l,r,t,b);
-                    if (min === t) { ball.y = this.y-ball.radius; ball.vy *= -ball.bounce; }
-                    else if (min === b) { ball.y = this.y+this.h+ball.radius; ball.vy *= -ball.bounce; }
-                    else if (min === l) { ball.x = this.x-ball.radius; ball.vx *= -ball.bounce; }
-                    else { ball.x = this.x+this.w+ball.radius; ball.vx *= -ball.bounce; }
+                if (ball.x + ball.radius > this.x && 
+                    ball.x - ball.radius < this.x + this.w &&
+                    ball.y + ball.radius > this.y && 
+                    ball.y - ball.radius < this.y + this.h) {
+                    
+                    let l = ball.x - this.x;
+                    let r = (this.x + this.w) - ball.x;
+                    let t = ball.y - this.y;
+                    let b = (this.y + this.h) - ball.y;
+                    
+                    let min = Math.min(l, r, t, b);
+                    
+                    if (min === t) {
+                        ball.y = this.y - ball.radius;
+                        ball.vy *= -ball.bounce;
+                    } else if (min === b) {
+                        ball.y = this.y + this.h + ball.radius;
+                        ball.vy *= -ball.bounce;
+                    } else if (min === l) {
+                        ball.x = this.x - ball.radius;
+                        ball.vx *= -ball.bounce;
+                    } else {
+                        ball.x = this.x + this.w + ball.radius;
+                        ball.vx *= -ball.bounce;
+                    }
                 }
             }
         }
@@ -192,44 +406,149 @@
             lines = [];
             cups = [new Cup(W/2, H - 100)];
             obstacles = [];
+            
+            // Level designs
             if (level === 1) {
-                obstacles.push(new Obstacle(W/2-80, H/2, 160, 20));
-                obstacles.push(new Obstacle(50, H/2+80, 100, 20));
-                obstacles.push(new Obstacle(W-150, H/2+80, 100, 20));
+                obstacles.push(new Obstacle(W/2 - 100, H/2, 200, 20));
+                obstacles.push(new Obstacle(30, H/2 + 100, 120, 20));
+                obstacles.push(new Obstacle(W - 150, H/2 + 100, 120, 20));
             } else if (level === 2) {
-                obstacles.push(new Obstacle(W/2-50, H/3, 100, 20));
-                obstacles.push(new Obstacle(30, H/2, 80, 20));
-                obstacles.push(new Obstacle(W-110, H/2, 80, 20));
-                obstacles.push(new Obstacle(W/2-60, H*2/3, 120, 20));
+                obstacles.push(new Obstacle(W/2 - 60, H/3, 120, 20));
+                obstacles.push(new Obstacle(20, H/2, 100, 20));
+                obstacles.push(new Obstacle(W - 120, H/2, 100, 20));
+                obstacles.push(new Obstacle(W/2 - 80, H*2/3, 160, 20));
+            } else if (level === 3) {
+                obstacles.push(new Obstacle(W/2 - 80, H/4, 160, 20));
+                obstacles.push(new Obstacle(50, H/2 - 30, 80, 20));
+                obstacles.push(new Obstacle(W - 130, H/2 - 30, 80, 20));
+                obstacles.push(new Obstacle(W/2 - 40, H/2 + 50, 80, 20));
+                obstacles.push(new Obstacle(50, H*3/4, 80, 20));
+                obstacles.push(new Obstacle(W - 130, H*3/4, 80, 20));
+            } else {
+                // Random obstacles
+                for (let i = 0; i < level + 1; i++) {
+                    obstacles.push(new Obstacle(
+                        Math.random() * (W - 150) + 75,
+                        H/3 + Math.random() * H/3,
+                        Math.random() * 80 + 40,
+                        15
+                    ));
+                }
             }
+            
             gameRunning = true;
             document.getElementById('restart').style.display = 'none';
             document.getElementById('win').style.display = 'none';
+            document.getElementById('levelNum').textContent = level;
         }
         
-        function restart() { currentLevel = 1; score = 0; document.getElementById('score').textContent = score; initLevel(currentLevel); }
-        function nextLevel() { currentLevel++; score += 50; document.getElementById('score').textContent = score; initLevel(currentLevel); }
+        function restart() {
+            currentLevel = 1;
+            score = 0;
+            document.getElementById('score').textContent = score;
+            initLevel(currentLevel);
+        }
         
-        let currentLine = [], drawing = false;
+        function nextLevel() {
+            currentLevel++;
+            score += 50 * currentLevel;
+            document.getElementById('score').textContent = score;
+            initLevel(currentLevel);
+        }
         
-        canvas.addEventListener('mousedown', e => { if(gameRunning){drawing=true;currentLine=[{x:e.clientX,y:e.clientY}];} });
-        canvas.addEventListener('mousemove', e => { if(drawing && gameRunning) currentLine.push({x:e.clientX,y:e.clientY}); });
-        canvas.addEventListener('mouseup', () => { if(currentLine.length>2) lines.push(new Line([...currentLine])); drawing=false;currentLine=[]; });
-        canvas.addEventListener('touchstart', e => { if(gameRunning){drawing=true;currentLine=[{x:e.touches[0].clientX,y:e.touches[0].clientY}];} });
-        canvas.addEventListener('touchmove', e => { if(drawing && gameRunning){e.preventDefault();currentLine.push({x:e.touches[0].clientX,y:e.touches[0].clientY});} });
-        canvas.addEventListener('touchend', () => { if(currentLine.length>2) lines.push(new Line([...currentLine])); drawing=false;currentLine=[]; });
+        let currentLine = [];
+        let drawing = false;
+        
+        canvas.addEventListener('mousedown', e => {
+            if (gameRunning) {
+                drawing = true;
+                currentLine = [{x: e.clientX, y: e.clientY}];
+            }
+        });
+        
+        canvas.addEventListener('mousemove', e => {
+            if (drawing && gameRunning) {
+                currentLine.push({x: e.clientX, y: e.clientY});
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            if (currentLine.length > 2) {
+                lines.push(new Line([...currentLine]));
+            }
+            drawing = false;
+            currentLine = [];
+        });
+        
+        canvas.addEventListener('touchstart', e => {
+            if (gameRunning) {
+                drawing = true;
+                currentLine = [{x: e.touches[0].clientX, y: e.touches[0].clientY}];
+            }
+        });
+        
+        canvas.addEventListener('touchmove', e => {
+            if (drawing && gameRunning) {
+                e.preventDefault();
+                currentLine.push({x: e.touches[0].clientX, y: e.touches[0].clientY});
+            }
+        });
+        
+        canvas.addEventListener('touchend', () => {
+            if (currentLine.length > 2) {
+                lines.push(new Line([...currentLine]));
+            }
+            drawing = false;
+            currentLine = [];
+        });
         
         function update() {
-            ctx.clearRect(0, 0, W, H);
-            obstacles.forEach(o => { o.draw(); if(gameRunning && ball) o.checkCollision(ball); });
-            lines.forEach(l => { l.draw(); if(gameRunning && ball) l.checkCollision(ball); });
+            // Clear with gradient
+            const bgGradient = ctx.createLinearGradient(0, 0, 0, H);
+            bgGradient.addColorStop(0, '#0a0a1a');
+            bgGradient.addColorStop(0.5, '#1a1a3a');
+            bgGradient.addColorStop(1, '#2a1a4a');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, W, H);
+            
+            // Draw obstacles
+            obstacles.forEach(o => {
+                o.draw();
+                if (gameRunning && ball) o.checkCollision(ball);
+            });
+            
+            // Draw lines
+            lines.forEach(l => {
+                l.draw();
+                if (gameRunning && ball) l.checkCollision(ball);
+            });
+            
+            // Draw current line
             if (currentLine.length > 1) {
-                ctx.beginPath(); ctx.moveTo(currentLine[0].x, currentLine[0].y);
+                ctx.beginPath();
+                ctx.moveTo(currentLine[0].x, currentLine[0].y);
                 currentLine.forEach(p => ctx.lineTo(p.x, p.y));
-                ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
+                ctx.strokeStyle = '#00ffaa';
+                ctx.lineWidth = 8;
+                ctx.lineCap = 'round';
+                ctx.shadowColor = '#00ffaa';
+                ctx.shadowBlur = 15;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
             }
-            cups.forEach(c => { c.draw(); if(gameRunning && ball) c.checkCollision(ball); });
-            if (ball) { ball.update(); ball.draw(); }
+            
+            // Draw cup (portal)
+            cups.forEach(c => {
+                c.draw();
+                if (gameRunning && ball) c.checkCollision(ball);
+            });
+            
+            // Update and draw ball (star)
+            if (ball) {
+                ball.update();
+                ball.draw();
+            }
+            
             requestAnimationFrame(update);
         }
         
