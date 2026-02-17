@@ -26,7 +26,7 @@
         
         .game-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; }
         .game-card:active { transform: scale(0.98); }
-        .game-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #e9ecef; }
+        .game-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; }
         .game-card .game-title { padding: 10px 8px; font-size: 0.7rem; font-weight: 600; text-align: center; }
         
         /* Game Player */
@@ -50,10 +50,6 @@
         <h1>🎮 Free Online Games</h1>
     </header>
     
-    <div class="ad-banner">
-        <ins class="adsbygoogle" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto"></ins>
-    </div>
-    
     <div class="search-bar">
         <input type="text" id="searchInput" placeholder="Search games...">
     </div>
@@ -61,10 +57,6 @@
     <div class="section" id="gameList">
         <h2 class="section-title">🔥 Today's Top Picks</h2>
         <div class="games-grid" id="dailyPicks"></div>
-    </div>
-    
-    <div class="ad-banner">
-        <ins class="adsbygoogle" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto"></ins>
     </div>
     
     <div class="section">
@@ -86,28 +78,29 @@
     </div>
 
     <script>
-        // CrazyGames embed URLs - these work in iframe!
+        // Games from various sources that allow embedding
         const games = [
-            { id: 1, name: "Slice Master", embed: "https://games.crazygames.com/en_US/slice-master/index.html", thumb: "https://img.crazygames.com/games/slice-master/thumbnail-260x180.jpg" },
-            { id: 2, name: "Space Waves", embed: "https://games.crazygames.com/en_US/space-waves/index.html", thumb: "https://img.crazygames.com/games/space-waves/thumbnail-260x180.jpg" },
-            { id: 3, name: "Smash Karts", embed: "https://games.crazygames.com/en_US/smash-karts/index.html", thumb: "https://img.crazygames.com/games/smash-karts/thumbnail-260x180.jpg" },
-            { id: 4, name: "PolyTrack", embed: "https://games.crazygames.com/en_US/polytrack/index.html", thumb: "https://img.crazygames.com/games/polytrack/thumbnail-260x180.jpg" },
-            { id: 5, name: "Ragdoll Archers", embed: "https://games.crazygames.com/en_US/ragdoll-archers/index.html", thumb: "https://img.crazygames.com/games/ragdoll-archers/thumbnail-260x180.jpg" },
-            { id: 6, name: "RocketGoal.io", embed: "https://games.crazygames.com/en_US/rocketgoal-io/index.html", thumb: "https://img.crazygames.com/games/rocketgoal-io/thumbnail-260x180.jpg" },
-            { id: 7, name: "Hexa Sort", embed: "https://games.crazygames.com/en_US/hexa-sort/index.html", thumb: "https://img.crazygames.com/games/hexa-sort/thumbnail-260x180.jpg" },
-            { id: 8, name: "Farm Merge Valley", embed: "https://games.crazygames.com/en_US/farm-merge-valley/index.html", thumb: "https://img.crazygames.com/games/farm-merge-valley/thumbnail-260x180.jpg" },
-            { id: 9, name: "Designville", embed: "https://games.crazygames.com/en_US/designville-merge-design/index.html", thumb: "https://img.crazygames.com/games/designville-merge-design/thumbnail-260x180.jpg" },
-            { id: 10, name: "Shell Shockers", embed: "https://games.crazygames.com/en_US/shellshockersio/index.html", thumb: "https://img.crazygames.com/games/shellshockersio/thumbnail-260x180.jpg" },
-            { id: 11, name: "8 Ball Pool", embed: "https://games.crazygames.com/en_US/8-ball-pool-wyr/index.html", thumb: "https://img.crazygames.com/games/8-ball-pool-wyr/thumbnail-260x180.jpg" },
-            { id: 12, name: "EvoWars.io", embed: "https://games.crazygames.com/en_US/evowarsio/index.html", thumb: "https://img.crazygames.com/games/evowarsio/thumbnail-260x180.jpg" },
-            { id: 13, name: "Drift Boss", embed: "https://games.crazygames.com/en_US/drift-boss/index.html", thumb: "https://img.crazygames.com/games/drift-boss/thumbnail-260x180.jpg" },
-            { id: 14, name: "Paper.io 2", embed: "https://games.crazygames.com/en_US/paper-io-2/index.html", thumb: "https://img.crazygames.com/games/paper-io-2/thumbnail-260x180.jpg" },
-            { id: 15, name: "Helix Jump", embed: "https://games.crazygames.com/en_US/helix-jump/index.html", thumb: "https://img.crazygames.com/games/helix-jump/thumbnail-260x180.jpg" },
-            { id: 16, name: "Flappy Dunk", embed: "https://games.crazygames.com/en_US/flappy-dunk/index.html", thumb: "https://img.crazygames.com/games/flappy-dunk/thumbnail-260x180.jpg" },
-            { id: 17, name: "Tangle Master", embed: "https://games.crazygames.com/en_US/tangle-master/index.html", thumb: "https://img.crazygames.com/games/tangle-master/thumbnail-260x180.jpg" },
-            { id: 18, name: "Count Masters", embed: "https://games.crazygames.com/en_US/count-masters-stickman-games/index.html", thumb: "https://img.crazygames.com/games/count-masters-stickman-games/thumbnail-260x180.jpg" },
-            { id: 19, name: "Doodle Road", embed: "https://games.crazygames.com/en_US/doodle-road/index.html", thumb: "https://img.crazygames.com/games/doodle-road/thumbnail-260x180.jpg" },
-            { id: 20, name: "Dig out of Prison", embed: "https://games.crazygames.com/en_US/dig-out-of-prison/index.html", thumb: "https://img.crazygames.com/games/dig-out-of-prison/thumbnail-260x180.jpg" }
+            // Voodoo games (popular, no ads in embed)
+            { id: 1, name: "Paper.io 2", embed: "https://games.voodoo.io/paperio2/", color: "#8b5cf6", icon: "📄" },
+            { id: 2, name: "Tunnel Rush", embed: "https://games.voodoo.io/tunnel-rush/", color: "#06b6d4", icon: "🚇" },
+            { id: 3, name: "Rail Slide", embed: "https://games.voodoo.io/rail-slide/", color: "#f59e0b", icon: "🎢" },
+            { id: 4, name: "Stack", embed: "https://games.voodoo.io/stack/", color: "#ec4899", icon: "📚" },
+            { id: 5, name: "Helix Jump", embed: "https://games.voodoo.io/helix-jump/", color: "#10b981", icon: "🌀" },
+            { id: 6, name: "Dunkers", embed: "https://games.voodoo.io/dunkers/", color: "#f97316", icon: "🏀" },
+            { id: 7, name: "Bounce", embed: "https://games.voodoo.io/bounce/", color: "#8b5cf6", icon: "⚽" },
+            { id: 8, name: "Stickman Hook", embed: "https://games.voodoo.io/stickman-hook/", color: "#ef4444", icon: "🪝" },
+            { id: 9, name: "Racing Max", embed: "https://games.voodoo.io/racing-max/", color: "#3b82f6", icon: "🏎️" },
+            { id: 10, name: "Soccer Skills", embed: "https://games.voodoo.io/soccer-skills/", color: "#22c55e", icon: "⚽" },
+            { id: 11, name: "Basketball Stars", embed: "https://games.voodoo.io/basketball-stars/", color: "#f97316", icon: "🏀" },
+            { id: 12, name: "Curve Ball", embed: "https://games.voodoo.io/curve-ball/", color: "#8b5cf6", icon: "🎱" },
+            { id: 13, name: "City Bike", embed: "https://games.voodoo.io/city-bike/", color: "#06b6d4", icon: "🚴" },
+            { id: 14, name: "Jelly Car", embed: "https://games.voodoo.io/jelly-car/", color: "#f59e0b", icon: "🍬" },
+            { id: 15, name: "Wrestle Jump", embed: "https://games.voodoo.io/wrestle-jump/", color: "#ec4899", icon: "🤼" },
+            { id: 16, name: "Doodled", embed: "https://games.voodoo.io/doodled/", color: "#10b981", icon: "✏️" },
+            { id: 17, name: "Fancy Pants", embed: "https://games.voodoo.io/fancy-pants/", color: "#f43f5e", icon: "👖" },
+            { id: 18, name: "Rolling Sky", embed: "https://games.voodoo.io/rolling-sky/", color: "#6366f1", icon: "☁️" },
+            { id: 19, name: "Run Race 3D", embed: "https://games.voodoo.io/run-race-3d/", color: "#14b8a6", icon: "🏃" },
+            { id: 20, name: "Square Bird", embed: "https://games.voodoo.io/square-bird/", color: "#f97316", icon: "🐦" }
         ];
 
         function renderGames() {
@@ -116,8 +109,9 @@
         }
 
         function createCard(game) {
+            // Use a gradient background with icon as fallback
             return `<div class="game-card" onclick="playGame('${game.name}', '${game.embed}')">
-                <img src="${game.thumb}" alt="${game.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23e9ecef%22 width=%2216%22 height=%229%22/><text x=%228%22 y=%225%22 text-anchor=%22middle%22 fill=%22%23888%22 font-size=%221%22>Game</text></svg>'">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:${game.color}'/><stop offset='100%25' style='stop-color:${game.color}99'/></linearGradient></defs><rect fill='url(%23g)' width='16' height='9'/><text x='8' y='5' text-anchor='middle' font-size='3' fill='white'>${game.icon}</text></svg>" alt="${game.name}">
                 <div class="game-title">${game.name}</div>
             </div>`;
         }
