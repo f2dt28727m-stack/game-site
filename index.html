@@ -4,431 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Play Free Online Games - No Download | HTML5 Games</title>
-    <meta name="description" content="Play the best free HTML5 games online. No download required. Enjoy popular games like Slice Master, Space Waves, Smash Karts and more on any device.">
-    <meta name="keywords" content="free games, online games, HTML5 games, no download, mobile games, browser games">
-    <title>Free Online Games - No Download | Play HTML5 Games</title>
+    <meta name="description" content="Play the best free HTML5 games online. No download required.">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #ff6b35; --dark: #2d3436; --bg: #f8f9fa; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--dark); min-height: 100vh; }
         
-        :root {
-            --primary: #ff6b35;
-            --secondary: #f7c59f;
-            --dark: #2d3436;
-            --light: #ffffff;
-            --bg: #f8f9fa;
-        }
+        header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; text-align: center; }
+        header h1 { font-size: 1.8rem; }
+        header p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--dark);
-            min-height: 100vh;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+        .ad-banner { background: #f0f0f0; min-height: 50px; display: flex; align-items: center; justify-content: center; padding: 8px; }
         
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 16px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+        .search-bar { padding: 12px 20px; background: white; }
+        .search-bar input { width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 12px; font-size: 1rem; }
         
-        header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
+        .section { padding: 16px 20px; }
+        .section-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; }
         
-        header p {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            margin-top: 4px;
-        }
+        .games-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         
-        /* Ad Banner Top */
-        .ad-banner-top {
-            background: #f0f0f0;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-        }
+        .game-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.2s; }
+        .game-card:active { transform: scale(0.98); }
+        .game-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #e9ecef; }
+        .game-card .game-title { padding: 10px 8px; font-size: 0.75rem; font-weight: 600; text-align: center; }
         
-        .ad-banner-top ins {
-            width: 100%;
-            max-width: 320px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            border-radius: 4px;
-        }
+        footer { background: #1a1a1a; color: #888; padding: 20px; text-align: center; font-size: 0.75rem; }
         
-        /* Search */
-        .search-bar {
-            padding: 12px 20px;
-            background: white;
-        }
-        
-        .search-bar input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        
-        .search-bar input:focus {
-            border-color: #667eea;
-        }
-        
-        /* Daily Picks */
-        .section {
-            padding: 16px 20px;
-        }
-        
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .section-title span {
-            font-size: 1.25rem;
-        }
-        
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-        
-        .game-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-        
-        .game-card:active {
-            transform: scale(0.98);
-        }
-        
-        .game-card img {
-            width: 100%;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-            background: #e9ecef;
-        }
-        
-        .game-card .game-title {
-            padding: 10px 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        /* All Games */
-        .all-games .games-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        
-        /* Ad Banner Middle */
-        .ad-banner-middle {
-            background: #f0f0f0;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            margin: 16px 20px;
-            border-radius: 8px;
-        }
-        
-        /* Game Modal */
-        .game-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--dark);
-            z-index: 1000;
-            flex-direction: column;
-        }
-        
-        .game-modal.active {
-            display: flex;
-        }
-        
-        .modal-header {
-            background: #1a1a1a;
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .modal-header h2 {
-            font-size: 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 70%;
-        }
-        
-        .close-btn {
-            background: #ff6b35;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .game-frame {
-            flex: 1;
-            width: 100%;
-            border: none;
-        }
-        
-        /* Game Loading Overlay */
-        .game-loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-        
-        .game-loading.hidden {
-            display: none;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #333;
-            border-top-color: #ff6b35;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .game-loading p {
-            color: #888;
-            margin-top: 16px;
-        }
-        
-        /* Footer */
-        footer {
-            background: #1a1a1a;
-            color: #888;
-            padding: 20px;
-            text-align: center;
-            font-size: 0.75rem;
-        }
-        
-        footer a {
-            color: #aaa;
-            text-decoration: none;
-        }
-        
-        /* Loading */
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
-            color: #888;
-        }
-        
-        /* Responsive */
         @media (min-width: 768px) {
-            .games-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .all-games .games-grid {
-                grid-template-columns: repeat(5, 1fr);
-            }
+            .games-grid { grid-template-columns: repeat(4, 1fr); }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <h1>🎮 Free Online Games</h1>
         <p>No download • Play instantly on any device</p>
     </header>
     
-    <!-- Ad Banner Top -->
-    <div class="ad-banner-top">
-        <!-- AdSense Top Banner - Replace with your ad unit -->
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <div class="ad-banner">
+        <ins class="adsbygoogle" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto"></ins>
     </div>
     
-    <!-- Search -->
     <div class="search-bar">
         <input type="text" id="searchInput" placeholder="Search games...">
     </div>
     
-    <!-- Daily Picks -->
     <div class="section">
         <h2 class="section-title">🔥 Today's Top Picks</h2>
-        <div class="games-grid" id="dailyPicks">
-            <!-- Games will be loaded here -->
-        </div>
+        <div class="games-grid" id="dailyPicks"></div>
     </div>
     
-    <!-- Ad Banner Middle -->
-    <div class="ad-banner-middle">
-        <!-- AdSense Middle Banner - Replace with your ad unit -->
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <div class="ad-banner">
+        <ins class="adsbygoogle" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto"></ins>
     </div>
     
-    <!-- All Games -->
-    <div class="section all-games">
+    <div class="section">
         <h2 class="section-title">🎯 All Games</h2>
-        <div class="games-grid" id="allGames">
-            <!-- Games will be loaded here -->
-        </div>
+        <div class="games-grid" id="allGames"></div>
     </div>
     
-    <!-- Footer -->
     <footer>
         <p>© 2026 Free Online Games. All rights reserved.</p>
-        <p>Games provided by <a href="https://www.crazygames.com" target="_blank">CrazyGames</a></p>
-        <p style="margin-top: 8px;">No copyright infringement intended. All games belong to their respective owners.</p>
     </footer>
-    
-    <!-- Game Modal -->
-    <div class="game-modal" id="gameModal">
-        <div class="modal-header">
-            <h2 id="modalTitle">Game Title</h2>
-            <button class="close-btn" onclick="closeGame()">✕ Close</button>
-        </div>
-        
-        <!-- Loading Overlay -->
-        <div class="game-loading" id="gameLoading">
-            <div class="spinner"></div>
-            <p>Loading game...</p>
-        </div>
-        
-        <iframe id="gameFrame" class="game-frame" src="" allowfullscreen onload="hideLoading()"></iframe>
-    </div>
 
     <script>
-        // Game Data - Poki games (open in new tab)
+        // Free embedded games from various sources
         const games = [
-            { id: 1, name: "Slice Master", url: "https://poki.com/g/slice-master", image: "https://img.poki.com/games/thumbnails/slice-master.png", plays: 250000 },
-            { id: 2, name: "Bubble Shooter", url: "https://poki.com/g/bubble-shooter-lak", image: "https://img.poki.com/games/thumbnails/bubble-shooter.png", plays: 220000 },
-            { id: 3, name: "Stickman Hook", url: "https://poki.com/g/stickman-hook", image: "https://img.poki.com/games/thumbnails/stickman-hook.png", plays: 200000 },
-            { id: 4, name: "Retro Bowl", url: "https://poki.com/g/retro-bowl", image: "https://img.poki.com/games/thumbnails/retro-bowl.png", plays: 180000 },
-            { id: 5, name: "Drive Mad", url: "https://poki.com/g/drive-mad", image: "https://img.poki.com/games/thumbnails/drive-mad.png", plays: 170000 },
-            { id: 6, name: "Moto X3M", url: "https://poki.com/g/moto-x3m", image: "https://img.poki.com/games/thumbnails/moto-x3m.png", plays: 160000 },
-            { id: 7, name: "Monkey Mart", url: "https://poki.com/g/monkey-mart", image: "https://img.poki.com/games/thumbnails/monkey-mart.png", plays: 150000 },
-            { id: 8, name: "My Perfect Hotel", url: "https://poki.com/g/my-perfect-hotel", image: "https://img.poki.com/games/thumbnails/my-perfect-hotel.png", plays: 140000 },
-            { id: 9, name: "Smash Karts", url: "https://poki.com/g/smash-karts", image: "https://img.poki.com/games/thumbnails/smash-karts.png", plays: 130000 },
-            { id: 10, name: "Basketball Stars", url: "https://poki.com/g/basketball-stars", image: "https://img.poki.com/games/thumbnails/basketball-stars.png", plays: 120000 },
-            { id: 11, name: "Temple of Boom", url: "https://poki.com/g/temple-of-boom", image: "https://img.poki.com/games/thumbnails/temple-of-boom.png", plays: 110000 },
-            { id: 12, name: "Level Devil", url: "https://poki.com/g/level-devil", image: "https://img.poki.com/games/thumbnails/level-devil.png", plays: 100000 },
-            { id: 13, name: "Blocky Blast Puzzle", url: "https://poki.com/g/blocky-blast-puzzle", image: "https://img.poki.com/games/th-blast-puzzleumbnails/blocky.png", plays: 95000 },
-            { id: 14, name: "Ragdoll Hit", url: "https://poki.com/g/ragdoll-hit", image: "https://img.poki.com/games/thumbnails/ragdoll-hit.png", plays: 90000 },
-            { id: 15, name: "Watermelon Drop", url: "https://poki.com/g/watermelon-drop", image: "https://img.poki.com/games/thumbnails/watermelon-drop.png", plays: 85000 },
-            { id: 16, name: "Vectaria.io", url: "https://poki.com/g/vectaria-io", image: "https://img.poki.com/games/thumbnails/vectaria-io.png", plays: 80000 },
-            { id: 17, name: "Friday Night Funkin", url: "https://poki.com/g/friday-night-funkin", image: "https://img.poki.com/games/thumbnails/friday-night-funkin.png", plays: 75000 },
-            { id: 18, name: "Blumgi Bounce", url: "https://poki.com/g/blumgi-bounce", image: "https://img.poki.com/games/thumbnails/blumgi-bounce.png", plays: 70000 },
-            { id: 19, name: "Penalty Shooters 2", url: "https://poki.com/g/penalty-shooters-2", image: "https://img.poki.com/games/thumbnails/penalty-shooters-2.png", plays: 65000 },
-            { id: 20, name: "Eggy Car", url: "https://poki.com/g/eggy-car", image: "https://img.poki.com/games/thumbnails/eggy-car.png", plays: 60000 }
+            { id: 1, name: "T-Rex Runner", url: "https://chromedino.com/", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/T-Rex_by_Polymer.svg/640px-T-Rex_by_Polymer.svg.png", type: "embed" },
+            { id: 2, name: "2048", url: "https://play2048.co/", image: "https://play2048.co/meta/logo.png", type: "embed" },
+            { id: 3, name: "Dino Game", url: "https://dino-chrome.com/", image: "https://dino-chrome.com/dino.png", type: "embed" },
+            { id: 4, name: "Pac-Man", url: "https://pacman.live/", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Pac_man.svg/640px-Pac_man.svg.png", type: "embed" },
+            { id: 5, name: "Snake", url: "https://playsnake.org/", image: "https://playsnake.org/snake.png", type: "embed" },
+            { id: 6, name: "Tetris", url: "https://tetris.com/", image: "https://tetris.com/images/tetris-logo.png", type: "embed" },
+            { id: 7, name: "Flappy Bird", url: "https://flappybird.io/", image: "https://flappybird.io/images/bird.png", type: "embed" },
+            { id: 8, name: "Pong", url: "https://ponggame.org/", image: "https://ponggame.org/pong.png", type: "embed" },
+            { id: 9, name: "Breakout", url: "https://breakout.org/", image: "https://breakout.org/breakout.png", type: "embed" },
+            { id: 10, name: "Space Invaders", url: "https://spaceinvaders.io/", image: "https://spaceinvaders.io/si.png", type: "embed" },
+            { id: 11, name: "Chess", url: "https://chess.com/", image: "https://chess.com/favicon.ico", type: "newtab" },
+            { id: 12, name: "Solitaire", url: "https://solitaire.com/", image: "https://solitaire.com/favicon.ico", type: "newtab" },
+            { id: 13, name: "Minesweeper", url: "https://minesweeper.io/", image: "https://minesweeper.io/favicon.ico", type: "embed" },
+            { id: 14, name: "Sudoku", url: "https://sudoku.com/", image: "https://sudoku.com/favicon.ico", type: "newtab" },
+            { id: 15, name: "Crossword", url: "https://crosswordle.com/", image: "https://crosswordle.com/favicon.ico", type: "newtab" },
+            { id: 16, name: "Wordle", url: "https://wordle.top/", image: "https://wordle.top/favicon.ico", type: "newtab" },
+            { id: 17, name: "Hangman", url: "https://hangman.plus/", image: "https://hangman.plus/favicon.ico", type: "newtab" },
+            { id: 18, name: "Bubble Shooter", url: "https://bubbleshooter.io/", image: "https://bubbleshooter.io/bs.png", type: "embed" },
+            { id: 19, name: "Tower Defense", url: "https://towerdefense.io/", image: "https://towerdefense.io/td.png", type: "embed" },
+            { id: 20, name: "Tower Blocks", url: "https://towerblocksgame.com/", image: "https://towerblocksgame.com/tb.png", type: "embed" }
         ];
 
-        // Render Games
         function renderGames() {
-            const dailyPicksContainer = document.getElementById('dailyPicks');
-            const allGamesContainer = document.getElementById('allGames');
-            
-            // Daily picks - top 6
-            const topGames = games.slice(0, 6);
-            dailyPicksContainer.innerHTML = topGames.map(game => createGameCard(game)).join('');
-            
-            // All games
-            allGamesContainer.innerHTML = games.map(game => createGameCard(game)).join('');
+            const dailyPicks = games.slice(0, 6);
+            document.getElementById('dailyPicks').innerHTML = dailyPicks.map(g => createCard(g)).join('');
+            document.getElementById('allGames').innerHTML = games.map(g => createCard(g)).join('');
         }
 
-        function createGameCard(game) {
-            return `
-                <div class="game-card" onclick="openGame('${game.name}', '${game.url}')">
-                    <img src="${game.image}" alt="${game.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23e9ecef%22 width=%2216%22 height=%229%22/><text x=%228%22 y=%225%22 text-anchor=%22middle%22 fill=%22%23888%22 font-size=%221%22>Game</text></svg>'">
-                    <div class="game-title">${game.name}</div>
-                </div>
-            `;
+        function createCard(game) {
+            const action = game.type === 'newtab' 
+                ? `window.open('${game.url}', '_blank')` 
+                : `window.open('${game.url}', '_blank')`;
+            return `<div class="game-card" onclick="${action}">
+                <img src="${game.image}" alt="${game.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23e9ecef%22 width=%2216%22 height=%229%22/><text x=%228%22 y=%225%22 text-anchor=%22middle%22 fill=%22%23888%22 font-size=%221%22>Game</text></svg>'">
+                <div class="game-title">${game.name}</div>
+            </div>`;
         }
 
-        // Open game in new tab (works for all games)
-        function openGame(title, url) {
-            window.open(url, '_blank');
-        }
-
-        function closeGame() {
-            document.getElementById('gameFrame').src = '';
-            document.getElementById('gameModal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Close modal on back button
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeGame();
-            }
+        document.getElementById('searchInput').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            document.getElementById('allGames').innerHTML = games.filter(g => g.name.toLowerCase().includes(q)).map(g => createCard(g)).join('');
         });
 
-        // Search
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase();
-            const filtered = games.filter(game => 
-                game.name.toLowerCase().includes(query)
-            );
-            
-            const allGamesContainer = document.getElementById('allGames');
-            allGamesContainer.innerHTML = filtered.map(game => createGameCard(game)).join('');
-        });
-
-        // Initialize
         renderGames();
-
-        // AdSense Load (commented out until you add your ad unit)
-        // (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
 </body>
 </html>
