@@ -349,7 +349,7 @@
     </div>
 
     <script>
-        // Game Data - Using Poki games (faster CDN)
+        // Game Data - Poki games (open in new tab)
         const games = [
             { id: 1, name: "Slice Master", url: "https://poki.com/g/slice-master", image: "https://img.poki.com/games/thumbnails/slice-master.png", plays: 250000 },
             { id: 2, name: "Bubble Shooter", url: "https://poki.com/g/bubble-shooter-lak", image: "https://img.poki.com/games/thumbnails/bubble-shooter.png", plays: 220000 },
@@ -363,7 +363,7 @@
             { id: 10, name: "Basketball Stars", url: "https://poki.com/g/basketball-stars", image: "https://img.poki.com/games/thumbnails/basketball-stars.png", plays: 120000 },
             { id: 11, name: "Temple of Boom", url: "https://poki.com/g/temple-of-boom", image: "https://img.poki.com/games/thumbnails/temple-of-boom.png", plays: 110000 },
             { id: 12, name: "Level Devil", url: "https://poki.com/g/level-devil", image: "https://img.poki.com/games/thumbnails/level-devil.png", plays: 100000 },
-            { id: 13, name: "Blocky Blast Puzzle", url: "https://poki.com/g/blocky-blast-puzzle", image: "https://img.poki.com/games/thumbnails/blocky-blast-puzzle.png", plays: 95000 },
+            { id: 13, name: "Blocky Blast Puzzle", url: "https://poki.com/g/blocky-blast-puzzle", image: "https://img.poki.com/games/th-blast-puzzleumbnails/blocky.png", plays: 95000 },
             { id: 14, name: "Ragdoll Hit", url: "https://poki.com/g/ragdoll-hit", image: "https://img.poki.com/games/thumbnails/ragdoll-hit.png", plays: 90000 },
             { id: 15, name: "Watermelon Drop", url: "https://poki.com/g/watermelon-drop", image: "https://img.poki.com/games/thumbnails/watermelon-drop.png", plays: 85000 },
             { id: 16, name: "Vectaria.io", url: "https://poki.com/g/vectaria-io", image: "https://img.poki.com/games/thumbnails/vectaria-io.png", plays: 80000 },
@@ -395,17 +395,9 @@
             `;
         }
 
-        // Game Modal
+        // Open game in new tab (works for all games)
         function openGame(title, url) {
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('gameLoading').classList.remove('hidden');
-            document.getElementById('gameFrame').src = url;
-            document.getElementById('gameModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function hideLoading() {
-            document.getElementById('gameLoading').classList.add('hidden');
+            window.open(url, '_blank');
         }
 
         function closeGame() {
