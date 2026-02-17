@@ -14,8 +14,6 @@
         header .back-btn { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: none; }
         header .back-btn.show { display: block; }
         
-        .ad-banner { background: #f0f0f0; min-height: 50px; display: flex; align-items: center; justify-content: center; padding: 8px; }
-        
         .search-bar { padding: 12px 20px; background: white; }
         .search-bar input { width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 12px; font-size: 1rem; }
         
@@ -26,7 +24,7 @@
         
         .game-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; }
         .game-card:active { transform: scale(0.98); }
-        .game-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; }
+        .game-card .game-thumb { width: 100%; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
         .game-card .game-title { padding: 10px 8px; font-size: 0.7rem; font-weight: 600; text-align: center; }
         
         /* Game Player */
@@ -78,29 +76,28 @@
     </div>
 
     <script>
-        // Games from various sources that allow embedding
+        // Voodoo games - no ads, H5
         const games = [
-            // Voodoo games (popular, no ads in embed)
-            { id: 1, name: "Paper.io 2", embed: "https://games.voodoo.io/paperio2/", color: "#8b5cf6", icon: "📄" },
-            { id: 2, name: "Tunnel Rush", embed: "https://games.voodoo.io/tunnel-rush/", color: "#06b6d4", icon: "🚇" },
-            { id: 3, name: "Rail Slide", embed: "https://games.voodoo.io/rail-slide/", color: "#f59e0b", icon: "🎢" },
-            { id: 4, name: "Stack", embed: "https://games.voodoo.io/stack/", color: "#ec4899", icon: "📚" },
-            { id: 5, name: "Helix Jump", embed: "https://games.voodoo.io/helix-jump/", color: "#10b981", icon: "🌀" },
-            { id: 6, name: "Dunkers", embed: "https://games.voodoo.io/dunkers/", color: "#f97316", icon: "🏀" },
-            { id: 7, name: "Bounce", embed: "https://games.voodoo.io/bounce/", color: "#8b5cf6", icon: "⚽" },
-            { id: 8, name: "Stickman Hook", embed: "https://games.voodoo.io/stickman-hook/", color: "#ef4444", icon: "🪝" },
-            { id: 9, name: "Racing Max", embed: "https://games.voodoo.io/racing-max/", color: "#3b82f6", icon: "🏎️" },
-            { id: 10, name: "Soccer Skills", embed: "https://games.voodoo.io/soccer-skills/", color: "#22c55e", icon: "⚽" },
-            { id: 11, name: "Basketball Stars", embed: "https://games.voodoo.io/basketball-stars/", color: "#f97316", icon: "🏀" },
-            { id: 12, name: "Curve Ball", embed: "https://games.voodoo.io/curve-ball/", color: "#8b5cf6", icon: "🎱" },
-            { id: 13, name: "City Bike", embed: "https://games.voodoo.io/city-bike/", color: "#06b6d4", icon: "🚴" },
-            { id: 14, name: "Jelly Car", embed: "https://games.voodoo.io/jelly-car/", color: "#f59e0b", icon: "🍬" },
-            { id: 15, name: "Wrestle Jump", embed: "https://games.voodoo.io/wrestle-jump/", color: "#ec4899", icon: "🤼" },
-            { id: 16, name: "Doodled", embed: "https://games.voodoo.io/doodled/", color: "#10b981", icon: "✏️" },
-            { id: 17, name: "Fancy Pants", embed: "https://games.voodoo.io/fancy-pants/", color: "#f43f5e", icon: "👖" },
-            { id: 18, name: "Rolling Sky", embed: "https://games.voodoo.io/rolling-sky/", color: "#6366f1", icon: "☁️" },
-            { id: 19, name: "Run Race 3D", embed: "https://games.voodoo.io/run-race-3d/", color: "#14b8a6", icon: "🏃" },
-            { id: 20, name: "Square Bird", embed: "https://games.voodoo.io/square-bird/", color: "#f97316", icon: "🐦" }
+            { id: 1, name: "Paper.io 2", embed: "https://games.voodoo.io/paperio2/", icon: "📄", color: "#8b5cf6" },
+            { id: 2, name: "Tunnel Rush", embed: "https://games.voodoo.io/tunnel-rush/", icon: "🚇", color: "#06b6d4" },
+            { id: 3, name: "Stack", embed: "https://games.voodoo.io/stack/", icon: "📚", color: "#ec4899" },
+            { id: 4, name: "Helix Jump", embed: "https://games.voodoo.io/helix-jump/", icon: "🌀", color: "#10b981" },
+            { id: 5, name: "Dunkers", embed: "https://games.voodoo.io/dunkers/", icon: "🏀", color: "#f97316" },
+            { id: 6, name: "Stickman Hook", embed: "https://games.voodoo.io/stickman-hook/", icon: "🪝", color: "#ef4444" },
+            { id: 7, name: "Racing Max", embed: "https://games.voodoo.io/racing-max/", icon: "🏎️", color: "#3b82f6" },
+            { id: 8, name: "Soccer Skills", embed: "https://games.voodoo.io/soccer-skills/", icon: "⚽", color: "#22c55e" },
+            { id: 9, name: "Basketball Stars", embed: "https://games.voodoo.io/basketball-stars/", icon: "🏀", color: "#f97316" },
+            { id: 10, name: "Curve Ball", embed: "https://games.voodoo.io/curve-ball/", icon: "🎱", color: "#8b5cf6" },
+            { id: 11, name: "City Bike", embed: "https://games.voodoo.io/city-bike/", icon: "🚴", color: "#06b6d4" },
+            { id: 12, name: "Jelly Car", embed: "https://games.voodoo.io/jelly-car/", icon: "🍬", color: "#f59e0b" },
+            { id: 13, name: "Wrestle Jump", embed: "https://games.voodoo.io/wrestle-jump/", icon: "🤼", color: "#ec4899" },
+            { id: 14, name: "Doodled", embed: "https://games.voodoo.io/doodled/", icon: "✏️", color: "#10b981" },
+            { id: 15, name: "Fancy Pants", embed: "https://games.voodoo.io/fancy-pants/", icon: "👖", color: "#f43f5e" },
+            { id: 16, name: "Rolling Sky", embed: "https://games.voodoo.io/rolling-sky/", icon: "☁️", color: "#6366f1" },
+            { id: 17, name: "Run Race 3D", embed: "https://games.voodoo.io/run-race-3d/", icon: "🏃", color: "#14b8a6" },
+            { id: 18, name: "Square Bird", embed: "https://games.voodoo.io/square-bird/", icon: "🐦", color: "#f97316" },
+            { id: 19, name: "Rail Slide", embed: "https://games.voodoo.io/rail-slide/", icon: "🎢", color: "#f59e0b" },
+            { id: 20, name: "Bounce", embed: "https://games.voodoo.io/bounce/", icon: "⚽", color: "#8b5cf6" }
         ];
 
         function renderGames() {
@@ -109,9 +106,8 @@
         }
 
         function createCard(game) {
-            // Use a gradient background with icon as fallback
             return `<div class="game-card" onclick="playGame('${game.name}', '${game.embed}')">
-                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:${game.color}'/><stop offset='100%25' style='stop-color:${game.color}99'/></linearGradient></defs><rect fill='url(%23g)' width='16' height='9'/><text x='8' y='5' text-anchor='middle' font-size='3' fill='white'>${game.icon}</text></svg>" alt="${game.name}">
+                <div class="game-thumb" style="background: linear-gradient(135deg, ${game.color}, ${game.color}99)">${game.icon}</div>
                 <div class="game-title">${game.name}</div>
             </div>`;
         }
