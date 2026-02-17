@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Play Free Online Games - No Download | HTML5 Games</title>
-    <meta name="description" content="Play the best free HTML5 games online. No download required.">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root { --primary: #ff6b35; --dark: #2d3436; --bg: #f8f9fa; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--dark); min-height: 100vh; }
         
-        header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; text-align: center; }
-        header h1 { font-size: 1.8rem; }
-        header p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
+        header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        header h1 { font-size: 1.5rem; }
+        header .back-btn { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: none; }
+        header .back-btn.show { display: block; }
         
         .ad-banner { background: #f0f0f0; min-height: 50px; display: flex; align-items: center; justify-content: center; padding: 8px; }
         
@@ -24,10 +24,18 @@
         
         .games-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         
-        .game-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.2s; }
+        .game-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; }
         .game-card:active { transform: scale(0.98); }
         .game-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #e9ecef; }
-        .game-card .game-title { padding: 10px 8px; font-size: 0.75rem; font-weight: 600; text-align: center; }
+        .game-card .game-title { padding: 10px 8px; font-size: 0.7rem; font-weight: 600; text-align: center; }
+        
+        /* Game Player */
+        .game-player { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; flex-direction: column; }
+        .game-player.active { display: flex; }
+        .player-header { background: #1a1a1a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .player-header h2 { font-size: 1rem; }
+        .close-btn { background: #ff6b35; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .game-frame { flex: 1; width: 100%; border: none; }
         
         footer { background: #1a1a1a; color: #888; padding: 20px; text-align: center; font-size: 0.75rem; }
         
@@ -38,8 +46,8 @@
 </head>
 <body>
     <header>
+        <button class="back-btn" id="backBtn" onclick="closeGame()">← Back</button>
         <h1>🎮 Free Online Games</h1>
-        <p>No download • Play instantly on any device</p>
     </header>
     
     <div class="ad-banner">
@@ -50,7 +58,7 @@
         <input type="text" id="searchInput" placeholder="Search games...">
     </div>
     
-    <div class="section">
+    <div class="section" id="gameList">
         <h2 class="section-title">🔥 Today's Top Picks</h2>
         <div class="games-grid" id="dailyPicks"></div>
     </div>
@@ -68,51 +76,75 @@
         <p>© 2026 Free Online Games. All rights reserved.</p>
     </footer>
 
+    <!-- Game Player -->
+    <div class="game-player" id="gamePlayer">
+        <div class="player-header">
+            <h2 id="playerTitle">Game</h2>
+            <button class="close-btn" onclick="closeGame()">✕ Close</button>
+        </div>
+        <iframe id="gameFrame" class="game-frame" src="" allowfullscreen></iframe>
+    </div>
+
     <script>
-        // Free embedded games from various sources
+        // CrazyGames embed URLs - these work in iframe!
         const games = [
-            { id: 1, name: "T-Rex Runner", url: "https://chromedino.com/", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/T-Rex_by_Polymer.svg/640px-T-Rex_by_Polymer.svg.png", type: "embed" },
-            { id: 2, name: "2048", url: "https://play2048.co/", image: "https://play2048.co/meta/logo.png", type: "embed" },
-            { id: 3, name: "Dino Game", url: "https://dino-chrome.com/", image: "https://dino-chrome.com/dino.png", type: "embed" },
-            { id: 4, name: "Pac-Man", url: "https://pacman.live/", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Pac_man.svg/640px-Pac_man.svg.png", type: "embed" },
-            { id: 5, name: "Snake", url: "https://playsnake.org/", image: "https://playsnake.org/snake.png", type: "embed" },
-            { id: 6, name: "Tetris", url: "https://tetris.com/", image: "https://tetris.com/images/tetris-logo.png", type: "embed" },
-            { id: 7, name: "Flappy Bird", url: "https://flappybird.io/", image: "https://flappybird.io/images/bird.png", type: "embed" },
-            { id: 8, name: "Pong", url: "https://ponggame.org/", image: "https://ponggame.org/pong.png", type: "embed" },
-            { id: 9, name: "Breakout", url: "https://breakout.org/", image: "https://breakout.org/breakout.png", type: "embed" },
-            { id: 10, name: "Space Invaders", url: "https://spaceinvaders.io/", image: "https://spaceinvaders.io/si.png", type: "embed" },
-            { id: 11, name: "Chess", url: "https://chess.com/", image: "https://chess.com/favicon.ico", type: "newtab" },
-            { id: 12, name: "Solitaire", url: "https://solitaire.com/", image: "https://solitaire.com/favicon.ico", type: "newtab" },
-            { id: 13, name: "Minesweeper", url: "https://minesweeper.io/", image: "https://minesweeper.io/favicon.ico", type: "embed" },
-            { id: 14, name: "Sudoku", url: "https://sudoku.com/", image: "https://sudoku.com/favicon.ico", type: "newtab" },
-            { id: 15, name: "Crossword", url: "https://crosswordle.com/", image: "https://crosswordle.com/favicon.ico", type: "newtab" },
-            { id: 16, name: "Wordle", url: "https://wordle.top/", image: "https://wordle.top/favicon.ico", type: "newtab" },
-            { id: 17, name: "Hangman", url: "https://hangman.plus/", image: "https://hangman.plus/favicon.ico", type: "newtab" },
-            { id: 18, name: "Bubble Shooter", url: "https://bubbleshooter.io/", image: "https://bubbleshooter.io/bs.png", type: "embed" },
-            { id: 19, name: "Tower Defense", url: "https://towerdefense.io/", image: "https://towerdefense.io/td.png", type: "embed" },
-            { id: 20, name: "Tower Blocks", url: "https://towerblocksgame.com/", image: "https://towerblocksgame.com/tb.png", type: "embed" }
+            { id: 1, name: "Slice Master", embed: "https://games.crazygames.com/en_US/slice-master/index.html", thumb: "https://img.crazygames.com/games/slice-master/thumbnail-260x180.jpg" },
+            { id: 2, name: "Space Waves", embed: "https://games.crazygames.com/en_US/space-waves/index.html", thumb: "https://img.crazygames.com/games/space-waves/thumbnail-260x180.jpg" },
+            { id: 3, name: "Smash Karts", embed: "https://games.crazygames.com/en_US/smash-karts/index.html", thumb: "https://img.crazygames.com/games/smash-karts/thumbnail-260x180.jpg" },
+            { id: 4, name: "PolyTrack", embed: "https://games.crazygames.com/en_US/polytrack/index.html", thumb: "https://img.crazygames.com/games/polytrack/thumbnail-260x180.jpg" },
+            { id: 5, name: "Ragdoll Archers", embed: "https://games.crazygames.com/en_US/ragdoll-archers/index.html", thumb: "https://img.crazygames.com/games/ragdoll-archers/thumbnail-260x180.jpg" },
+            { id: 6, name: "RocketGoal.io", embed: "https://games.crazygames.com/en_US/rocketgoal-io/index.html", thumb: "https://img.crazygames.com/games/rocketgoal-io/thumbnail-260x180.jpg" },
+            { id: 7, name: "Hexa Sort", embed: "https://games.crazygames.com/en_US/hexa-sort/index.html", thumb: "https://img.crazygames.com/games/hexa-sort/thumbnail-260x180.jpg" },
+            { id: 8, name: "Farm Merge Valley", embed: "https://games.crazygames.com/en_US/farm-merge-valley/index.html", thumb: "https://img.crazygames.com/games/farm-merge-valley/thumbnail-260x180.jpg" },
+            { id: 9, name: "Designville", embed: "https://games.crazygames.com/en_US/designville-merge-design/index.html", thumb: "https://img.crazygames.com/games/designville-merge-design/thumbnail-260x180.jpg" },
+            { id: 10, name: "Shell Shockers", embed: "https://games.crazygames.com/en_US/shellshockersio/index.html", thumb: "https://img.crazygames.com/games/shellshockersio/thumbnail-260x180.jpg" },
+            { id: 11, name: "8 Ball Pool", embed: "https://games.crazygames.com/en_US/8-ball-pool-wyr/index.html", thumb: "https://img.crazygames.com/games/8-ball-pool-wyr/thumbnail-260x180.jpg" },
+            { id: 12, name: "EvoWars.io", embed: "https://games.crazygames.com/en_US/evowarsio/index.html", thumb: "https://img.crazygames.com/games/evowarsio/thumbnail-260x180.jpg" },
+            { id: 13, name: "Drift Boss", embed: "https://games.crazygames.com/en_US/drift-boss/index.html", thumb: "https://img.crazygames.com/games/drift-boss/thumbnail-260x180.jpg" },
+            { id: 14, name: "Paper.io 2", embed: "https://games.crazygames.com/en_US/paper-io-2/index.html", thumb: "https://img.crazygames.com/games/paper-io-2/thumbnail-260x180.jpg" },
+            { id: 15, name: "Helix Jump", embed: "https://games.crazygames.com/en_US/helix-jump/index.html", thumb: "https://img.crazygames.com/games/helix-jump/thumbnail-260x180.jpg" },
+            { id: 16, name: "Flappy Dunk", embed: "https://games.crazygames.com/en_US/flappy-dunk/index.html", thumb: "https://img.crazygames.com/games/flappy-dunk/thumbnail-260x180.jpg" },
+            { id: 17, name: "Tangle Master", embed: "https://games.crazygames.com/en_US/tangle-master/index.html", thumb: "https://img.crazygames.com/games/tangle-master/thumbnail-260x180.jpg" },
+            { id: 18, name: "Count Masters", embed: "https://games.crazygames.com/en_US/count-masters-stickman-games/index.html", thumb: "https://img.crazygames.com/games/count-masters-stickman-games/thumbnail-260x180.jpg" },
+            { id: 19, name: "Doodle Road", embed: "https://games.crazygames.com/en_US/doodle-road/index.html", thumb: "https://img.crazygames.com/games/doodle-road/thumbnail-260x180.jpg" },
+            { id: 20, name: "Dig out of Prison", embed: "https://games.crazygames.com/en_US/dig-out-of-prison/index.html", thumb: "https://img.crazygames.com/games/dig-out-of-prison/thumbnail-260x180.jpg" }
         ];
 
         function renderGames() {
-            const dailyPicks = games.slice(0, 6);
-            document.getElementById('dailyPicks').innerHTML = dailyPicks.map(g => createCard(g)).join('');
+            document.getElementById('dailyPicks').innerHTML = games.slice(0, 6).map(g => createCard(g)).join('');
             document.getElementById('allGames').innerHTML = games.map(g => createCard(g)).join('');
         }
 
         function createCard(game) {
-            const action = game.type === 'newtab' 
-                ? `window.open('${game.url}', '_blank')` 
-                : `window.open('${game.url}', '_blank')`;
-            return `<div class="game-card" onclick="${action}">
-                <img src="${game.image}" alt="${game.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23e9ecef%22 width=%2216%22 height=%229%22/><text x=%228%22 y=%225%22 text-anchor=%22middle%22 fill=%22%23888%22 font-size=%221%22>Game</text></svg>'">
+            return `<div class="game-card" onclick="playGame('${game.name}', '${game.embed}')">
+                <img src="${game.thumb}" alt="${game.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23e9ecef%22 width=%2216%22 height=%229%22/><text x=%228%22 y=%225%22 text-anchor=%22middle%22 fill=%22%23888%22 font-size=%221%22>Game</text></svg>'">
                 <div class="game-title">${game.name}</div>
             </div>`;
+        }
+
+        function playGame(title, url) {
+            document.getElementById('playerTitle').textContent = title;
+            document.getElementById('gameFrame').src = url;
+            document.getElementById('gamePlayer').classList.add('active');
+            document.getElementById('backBtn').classList.add('show');
+            document.getElementById('gameList').style.display = 'none';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeGame() {
+            document.getElementById('gameFrame').src = '';
+            document.getElementById('gamePlayer').classList.remove('active');
+            document.getElementById('backBtn').classList.remove('show');
+            document.getElementById('gameList').style.display = 'block';
+            document.body.style.overflow = '';
         }
 
         document.getElementById('searchInput').addEventListener('input', e => {
             const q = e.target.value.toLowerCase();
             document.getElementById('allGames').innerHTML = games.filter(g => g.name.toLowerCase().includes(q)).map(g => createCard(g)).join('');
         });
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeGame(); });
 
         renderGames();
     </script>
