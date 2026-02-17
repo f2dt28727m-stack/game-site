@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Ball - Ocean</title>
+    <style>
+        *{margin:0;padding:0}
+        body{background:#001d3d;overflow:hidden;touch-action:none}
+        #g{width:100%;height:100%;display:block}
+    </style>
+</head>
+<body>
+    <canvas id="g"></canvas>
+    <script>
+        var c=document.getElementById('g'),x=c.getContext('2d');
+        var W=c.width=innerWidth,H=c.height=innerHeight;
+        var ball={x:W/2,y:50,vx:0,vy:0,r:20,g:0.4,bounce:0.6};
+        var line=[],cups=[{x:W/2,y:H-80,w:50,h:40,f:false}];
+        var obs=[];
+        
+        function draw(){
+            x.fillStyle='#001d3d';x.fillRect(0,0,W,H);
+            // Ball
+            x.beginPath();x.arc(ball.x,ball.y,ball.r,0,6.28);x.fillStyle='#ff69b4';x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();
+            // Cup
+            var cup=cups[0];
+            x.fillStyle=cup.f?'#ffd700':'#8B4513';x.fillRect(cup.x-25,cup.y-15,50,30);
+            // Obs
+            obs.forEach(o=>{x.fillStyle='#ff6b6b';x.fillRect(o.x,o.y,o.w,o.h)});
+            // Line
+            if(line.length>1){x.beginPath();x.moveTo(line[0].x,line[0].y);line.forEach(p=>x.lineTo(p.x,p.y));x.strokeStyle='#0ff';x.lineWidth=6;x.stroke()}
+            requestAnimationFrame(draw);
+        }
+        function update(){
+            ball.vy+=ball.g;ball.x+=ball.vx;ball.y+=ball.vy;
+            if(ball.x<ball.r||ball.x>W-ball.r)ball.vx*=-ball.bounce;
+            if(ball.y>H+50)ball.y=50;
+        }
+        draw();
+        setInterval(update,16);
+        
+        c.onpointerdown=e=>{line=[{x:e.clientX,y:e.clientY}]};
+        c.onpointermove=e=>{if(line.length)line.push({x:e.clientX,y:e.clientY})};
+        c.onpointerup=()=>{line=[]};
+    </script>
+</body>
+</html>
