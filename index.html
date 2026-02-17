@@ -2,419 +2,165 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Happy Ball - Free H5 Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free H5 Games</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, sans-serif; 
-            background: #1a1a2e; 
-            color: white; 
-            overflow: hidden;
-            touch-action: none;
-        }
-        #game { 
-            width: 100vw; 
-            height: 100vh; 
-            display: block;
-        }
-        #ui {
-            position: fixed;
-            top: 20px;
-            left: 0;
-            right: 0;
+        body { font-family: -apple-system, sans-serif; background: #0f0f23; color: white; min-height: 100vh; }
+        
+        header { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            padding: 20px; 
             text-align: center;
-            pointer-events: none;
-            z-index: 10;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        #score {
-            font-size: 2rem;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        h1 { font-size: 1.5rem; }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        #hint {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            margin-top: 5px;
-        }
-        #restart {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #e94560;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            border-radius: 30px;
+        
+        .game-card {
+            background: #1a1a2e;
+            border-radius: 16px;
+            overflow: hidden;
             cursor: pointer;
-            display: none;
-            z-index: 20;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #2a2a4e;
+            transition: all 0.3s;
         }
-        #win {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        
+        .game-card:hover {
+            transform: scale(1.05);
+            border-color: #667eea;
+        }
+        
+        .game-card.coming-soon {
+            opacity: 0.5;
+            border-style: dashed;
+        }
+        
+        .game-icon { font-size: 3rem; margin-bottom: 10px; }
+        .game-name { font-size: 0.9rem; font-weight: 600; }
+        .game-status { font-size: 0.7rem; color: #888; margin-top: 5px; }
+        
+        /* Game player */
+        .player { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: #0f0f23; 
+            z-index: 1000;
+            flex-direction: column;
+        }
+        .player.active { display: flex; }
+        
+        .player-header {
             background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .player-header h2 { font-size: 1rem; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
             color: white;
             border: none;
-            padding: 20px 50px;
-            font-size: 1.5rem;
-            border-radius: 30px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            display: none;
-            z-index: 20;
+        }
+        
+        iframe { flex: 1; border: none; width: 100%; }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        @media (min-width: 768px) {
+            .games-grid { grid-template-columns: repeat(4, 1fr); }
         }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <div id="score">0</div>
-        <div id="hint">Tap to draw lines</div>
+    <header>
+        <h1>🎮 Free H5 Games</h1>
+    </header>
+    
+    <div class="games-grid" id="games">
+        <!-- Games will be loaded here -->
     </div>
-    <canvas id="game"></canvas>
-    <button id="restart" onclick="restart()">Try Again</button>
-    <button id="win" onclick="nextLevel()">Next Level!</button>
+    
+    <footer>
+        © 2026 Free Games - No Download Required
+    </footer>
+    
+    <!-- Game Player -->
+    <div class="player" id="player">
+        <div class="player-header">
+            <button class="back-btn" onclick="closeGame()">← Back</button>
+            <h2 id="gameTitle">Game</h2>
+            <div></div>
+        </div>
+        <iframe id="gameFrame" allowfullscreen></iframe>
+    </div>
 
     <script>
-        const canvas = document.getElementById('game');
-        const ctx = canvas.getContext('2d');
+        const games = [
+            { id: 1, name: "Happy Ball", icon: "🎯", status: "", url: "happy-ball.html" },
+            { id: 2, name: "俄罗斯方块", icon: "🧱", status: "COMING SOON", url: "" },
+            { id: 3, name: "贪吃蛇", icon: "🐍", status: "COMING SOON", url: "" },
+            { id: 4, name: "打砖块", icon: "🧱", status: "COMING SOON", url: "" },
+            { id: 5, name: "赛车", icon: "🏎️", status: "COMING SOON", url: "" },
+            { id: 6, name: "消消乐", icon: "🫧", status: "COMING SOON", url: "" },
+            { id: 7, name: "2048", icon: "🔢", status: "COMING SOON", url: "" },
+            { id: 8, name: "弹珠", icon: "🔮", status: "COMING SOON", url: "" },
+            { id: 9, name: "台球", icon: "🎱", status: "COMING SOON", url: "" },
+            { id: 10, name: "更多游戏", icon: "🎮", status: "COMING SOON", url: "" }
+        ];
         
-        let W, H;
-        let ball = null;
-        let lines = [];
-        let cups = [];
-        let currentLevel = 1;
-        let score = 0;
-        let gameRunning = true;
-        let drawing = false;
-        
-        function resize() {
-            W = canvas.width = window.innerWidth;
-            H = canvas.height = window.innerHeight;
-        }
-        resize();
-        window.addEventListener('resize', resize);
-        
-        // Ball class
-        class Ball {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.vx = 0;
-                this.vy = 0;
-                this.radius = 15;
-                this.gravity = 0.5;
-                this.bounce = 0.6;
-                this.friction = 0.99;
-            }
-            
-            update() {
-                this.vy += this.gravity;
-                this.vx *= this.friction;
-                this.vy *= this.friction;
-                this.x += this.vx;
-                this.y += this.vy;
-                
-                // Wall collision
-                if (this.x < this.radius) { this.x = this.radius; this.vx *= -this.bounce; }
-                if (this.x > W - this.radius) { this.x = W - this.radius; this.vx *= -this.bounce; }
-                if (this.y > H + 50) {
-                    // Fell off screen
-                    if (gameRunning) {
-                        document.getElementById('restart').style.display = 'block';
-                        gameRunning = false;
-                    }
-                }
-            }
-            
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#e94560';
-                ctx.fill();
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
+        function renderGames() {
+            const container = document.getElementById('games');
+            container.innerHTML = games.map(g => `
+                <div class="game-card ${g.url ? '' : 'coming-soon'}" onclick="${g.url ? `playGame('${g.name}', '${g.url}')` : ''}">
+                    <div class="game-icon">${g.icon}</div>
+                    <div class="game-name">${g.name}</div>
+                    <div class="game-status">${g.status}</div>
+                </div>
+            `).join('');
         }
         
-        // Line class (player drawn)
-        class Line {
-            constructor(points) {
-                this.points = points;
-            }
-            
-            draw() {
-                if (this.points.length < 2) return;
-                ctx.beginPath();
-                ctx.moveTo(this.points[0].x, this.points[0].y);
-                for (let i = 1; i < this.points.length; i++) {
-                    ctx.lineTo(this.points[i].x, this.points[i].y);
-                }
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 8;
-                ctx.lineCap = 'round';
-                ctx.stroke();
-            }
-            
-            checkCollision(ball) {
-                for (let i = 0; i < this.points.length - 1; i++) {
-                    let p1 = this.points[i];
-                    let p2 = this.points[i + 1];
-                    
-                    // Line segment collision
-                    let dx = p2.x - p1.x;
-                    let dy = p2.y - p1.y;
-                    let len = Math.sqrt(dx * dx + dy * dy);
-                    if (len === 0) continue;
-                    
-                    let t = Math.max(0, Math.min(1, ((ball.x - p1.x) * dx + (ball.y - p1.y) * dy) / (len * len)));
-                    let closestX = p1.x + t * dx;
-                    let closestY = p1.y + t * dy;
-                    
-                    let distX = ball.x - closestX;
-                    let distY = ball.y - closestY;
-                    let dist = Math.sqrt(distX * distX + distY * distY);
-                    
-                    if (dist < ball.radius + 4) {
-                        // Bounce
-                        let nx = distX / dist;
-                        let ny = distY / dist;
-                        ball.vx += nx * 3;
-                        ball.vy += ny * 3;
-                        ball.x = closestX + nx * (ball.radius + 5);
-                        ball.y = closestY + ny * (ball.radius + 5);
-                    }
-                }
-            }
+        function playGame(title, url) {
+            document.getElementById('gameTitle').textContent = title;
+            document.getElementById('gameFrame').src = url;
+            document.getElementById('player').classList.add('active');
         }
         
-        // Cup (goal)
-        class Cup {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.width = 60;
-                this.height = 50;
-                this.filled = false;
-            }
-            
-            draw() {
-                ctx.fillStyle = this.filled ? '#10b981' : '#6366f1';
-                // Cup shape
-                ctx.beginPath();
-                ctx.moveTo(this.x - this.width/2, this.y - this.height/2);
-                ctx.lineTo(this.x - this.width/2 + 10, this.y + this.height/2);
-                ctx.lineTo(this.x + this.width/2 - 10, this.y + this.height/2);
-                ctx.lineTo(this.x + this.width/2, this.y - this.height/2);
-                ctx.closePath();
-                ctx.fill();
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-            
-            checkCollision(ball) {
-                if (ball.x > this.x - this.width/2 && 
-                    ball.x < this.x + this.width/2 &&
-                    ball.y > this.y - this.height/2 &&
-                    ball.y < this.y + this.height/2) {
-                    if (!this.filled) {
-                        this.filled = true;
-                        score += 100;
-                        document.getElementById('score').textContent = score;
-                        gameRunning = false;
-                        document.getElementById('win').style.display = 'block';
-                    }
-                }
-            }
+        function closeGame() {
+            document.getElementById('gameFrame').src = '';
+            document.getElementById('player').classList.remove('active');
         }
         
-        // Obstacles
-        class Obstacle {
-            constructor(x, y, w, h) {
-                this.x = x;
-                this.y = y;
-                this.w = w;
-                this.h = h;
-            }
-            
-            draw() {
-                ctx.fillStyle = '#4a5568';
-                ctx.fillRect(this.x, this.y, this.w, this.h);
-            }
-            
-            checkCollision(ball) {
-                if (ball.x + ball.radius > this.x && 
-                    ball.x - ball.radius < this.x + this.w &&
-                    ball.y + ball.radius > this.y && 
-                    ball.y - ball.radius < this.y + this.h) {
-                    
-                    // Find closest edge
-                    let left = ball.x - this.x;
-                    let right = (this.x + this.w) - ball.x;
-                    let top = ball.y - this.y;
-                    let bottom = (this.y + this.h) - ball.y;
-                    
-                    let min = Math.min(left, right, top, bottom);
-                    
-                    if (min === top) {
-                        ball.y = this.y - ball.radius;
-                        ball.vy *= -ball.bounce;
-                    } else if (min === bottom) {
-                        ball.y = this.y + this.h + ball.radius;
-                        ball.vy *= -ball.bounce;
-                    } else if (min === left) {
-                        ball.x = this.x - ball.radius;
-                        ball.vx *= -ball.bounce;
-                    } else {
-                        ball.x = this.x + this.w + ball.radius;
-                        ball.vx *= -ball.bounce;
-                    }
-                }
-            }
-        }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeGame();
+        });
         
-        let obstacles = [];
-        
-        function initLevel(level) {
-            ball = new Ball(W/2, 60);
-            lines = [];
-            cups = [new Cup(W/2, H - 100)];
-            obstacles = [];
-            
-            // Level designs
-            if (level === 1) {
-                obstacles.push(new Obstacle(W/2 - 80, H/2, 160, 20));
-                obstacles.push(new Obstacle(50, H/2 + 80, 100, 20));
-                obstacles.push(new Obstacle(W - 150, H/2 + 80, 100, 20));
-            } else if (level === 2) {
-                obstacles.push(new Obstacle(W/2 - 50, H/3, 100, 20));
-                obstacles.push(new Obstacle(30, H/2, 80, 20));
-                obstacles.push(new Obstacle(W - 110, H/2, 80, 20));
-                obstacles.push(new Obstacle(W/2 - 60, H*2/3, 120, 20));
-            } else {
-                // Random obstacles for higher levels
-                for (let i = 0; i < level + 2; i++) {
-                    obstacles.push(new Obstacle(
-                        Math.random() * (W - 150) + 75,
-                        H/3 + Math.random() * H/3,
-                        Math.random() * 80 + 40,
-                        15
-                    ));
-                }
-            }
-            
-            gameRunning = true;
-            document.getElementById('restart').style.display = 'none';
-            document.getElementById('win').style.display = 'none';
-        }
-        
-        function restart() {
-            currentLevel = 1;
-            score = 0;
-            document.getElementById('score').textContent = score;
-            initLevel(currentLevel);
-        }
-        
-        function nextLevel() {
-            currentLevel++;
-            score += 50;
-            document.getElementById('score').textContent = score;
-            initLevel(currentLevel);
-        }
-        
-        // Drawing
-        let currentLine = [];
-        
-        canvas.addEventListener('mousedown', startDraw);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', endDraw);
-        canvas.addEventListener('touchstart', startDraw);
-        canvas.addEventListener('touchmove', draw);
-        canvas.addEventListener('touchend', endDraw);
-        
-        function startDraw(e) {
-            if (!gameRunning) return;
-            e.preventDefault();
-            drawing = true;
-            currentLine = [];
-            let pos = getPos(e);
-            currentLine.push(pos);
-        }
-        
-        function draw(e) {
-            if (!drawing || !gameRunning) return;
-            e.preventDefault();
-            let pos = getPos(e);
-            currentLine.push(pos);
-        }
-        
-        function endDraw() {
-            if (!drawing) return;
-            drawing = false;
-            if (currentLine.length > 2) {
-                lines.push(new Line([...currentLine]));
-            }
-            currentLine = [];
-        }
-        
-        function getPos(e) {
-            if (e.touches) {
-                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            }
-            return { x: e.clientX, y: e.clientY };
-        }
-        
-        // Game loop
-        function update() {
-            ctx.clearRect(0, 0, W, H);
-            
-            // Draw obstacles
-            obstacles.forEach(o => {
-                o.draw();
-                if (gameRunning && ball) o.checkCollision(ball);
-            });
-            
-            // Draw lines
-            lines.forEach(l => {
-                l.draw();
-                if (gameRunning && ball) l.checkCollision(ball);
-            });
-            
-            // Draw current line
-            if (currentLine.length > 1) {
-                ctx.beginPath();
-                ctx.moveTo(currentLine[0].x, currentLine[0].y);
-                for (let p of currentLine) {
-                    ctx.lineTo(p.x, p.y);
-                }
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 8;
-                ctx.lineCap = 'round';
-                ctx.stroke();
-            }
-            
-            // Draw cup
-            cups.forEach(c => {
-                c.draw();
-                if (gameRunning && ball) c.checkCollision(ball);
-            });
-            
-            // Update and draw ball
-            if (ball) {
-                ball.update();
-                ball.draw();
-            }
-            
-            requestAnimationFrame(update);
-        }
-        
-        initLevel(1);
-        update();
+        renderGames();
     </script>
 </body>
 </html>
