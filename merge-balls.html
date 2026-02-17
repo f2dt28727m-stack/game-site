@@ -115,9 +115,9 @@ function addScore(s){ score += s; scoreEl.innerText = score }
 
 function checkLose(){
   if(gameOver) return;
-  // Only check balls that have dropped and are stationary
+  // Only check balls that have fallen below 200px and are nearly stopped
   for(const b of balls){
-    if(b.y - b.r < 100 && Math.abs(b.vy) < 2){
+    if(b.y > 200 && Math.abs(b.vy) < 1 && b.y - b.r < 100){
       gameOver = true;
       setTimeout(()=>{ alert('游戏结束！得分：'+score); location.reload(); },100);
     }
